@@ -57,7 +57,7 @@ struct ZavrsniRad {
 	char* _brojIndeksa;
 	char* _tema;
 	Poglavlje* _poglavljaRada;
-	int _trenutnoPoglavlja;
+	//int _trenutnoPoglavlja; //zadao bez ovog 
 	char* _datumOdbrane;
 	float _konacnaOcjena; //konacna ocjena zavrsnog rada predstavlja prosjek ocjena svih poglavlja u zavrsnom radu koja se izracunava u momentu zakazivanja odbrane
 
