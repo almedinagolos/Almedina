@@ -57,7 +57,7 @@ struct ZavrsniRad {
 	char* _brojIndeksa;
 	char* _tema;
 	Poglavlje* _poglavljaRada;
-	//int _trenutnoPoglavlja; //zadao bez ovog 
+	 // int _trenutnoPoglavlja; //zadao ovakav zadatak bez trenutnoPoglavlja
 	char* _datumOdbrane;
 	float _konacnaOcjena; //konacna ocjena zavrsnog rada predstavlja prosjek ocjena svih poglavlja u zavrsnom radu koja se izracunava u momentu zakazivanja odbrane
 
@@ -69,7 +69,7 @@ struct ZavrsniRad {
 		_tema = AlocirajNizKaraktera(nazivTeme);
 		_datumOdbrane = AlocirajNizKaraktera(not_set);
 	}
-	/* void Kopiraj(ZavrsniRad &rad) {
+	void Kopiraj(ZavrsniRad &rad) {
 		Unos(rad._brojIndeksa, rad._tema);
 		for (int i = 0; i < rad._trenutnoPoglavlja; i++)
 		{
@@ -77,8 +77,8 @@ struct ZavrsniRad {
 			OcijeniPoglavlje(rad._poglavljaRada[i]._naslov, rad._poglavljaRada[i]._ocjena);
 		}
 
-	} */
-	/* void DodajPoglavlje(const char* nazivPoglavlja, const char* sadrzajPoglavlja) {
+	}
+	void DodajPoglavlje(const char* nazivPoglavlja, const char* sadrzajPoglavlja) {
 		for (int i = 0; i < _trenutnoPoglavlja; i++)
 		{
 			if (strcmp(_poglavljaRada[i]._naslov, nazivPoglavlja) == 0) {
@@ -114,8 +114,7 @@ struct ZavrsniRad {
 				return;
 			}
 		}
-	} */ 
-	//ovo je rjesenje kad imamo trenutnoPoglavlja
+	}
 	void Dealociraj() {
 		delete[] _tema; _tema = nullptr;
 		delete[] _datumOdbrane; _datumOdbrane = nullptr;
@@ -139,7 +138,7 @@ struct Nastavnik {
 	void Unos(const char* imePrezime) {
 		_imePrezime = AlocirajNizKaraktera(imePrezime);
 	}
-	/* bool DodajZavrsniRad(ZavrsniRad rad) {
+	bool DodajZavrsniRad(ZavrsniRad rad) {
 		for (int i = 0; i < max_zavrsnih; i++)
 		{
 			if (_teme[i] == nullptr)
@@ -152,7 +151,7 @@ struct Nastavnik {
 				return false;
 		}
 		return false;
-	} */
+	}
 	void Dealociraj() {
 		delete[] _imePrezime; _imePrezime = nullptr;
 		for (size_t i = 0; i < max_zavrsnih; i++)
@@ -192,7 +191,7 @@ int main() {
 
 	/*u zavrsni rad dodaje novo poglavlje i njegov sadrzaj. ukoliko poglavlje vec postoji u zavrsnom radu, funkcija tom poglavlju treba dodati novi sadrzaj i pri tome zadrzi postojeci (izmedju postojeceg i novog sadrzaja se dodaje prazan prostor). u slucaju da poglavlje ne postoji, ono se dodaje zajedno sa sadrzajem*/
 	//parametri: nazivPoglavlja, sadrzajPoglavlja
-/*	multimedijalni.DodajPoglavlje("Uvod", "U ovom poglavlju ce biti rijeci");
+	multimedijalni.DodajPoglavlje("Uvod", "U ovom poglavlju ce biti rijeci");
 	multimedijalni.DodajPoglavlje("Uvod", "o multimedijalnim sistemima koji se danas koriste");
 	multimedijalni.DodajPoglavlje("Uvod", "u savremenom poslovanju");
 	multimedijalni.DodajPoglavlje("Vrste multimedijalnih sistema", "Danas se moze govoriti o nekoliko vrsta multimedijalnih sistema, a neke od najznacajnijih su ...");
@@ -200,11 +199,11 @@ int main() {
 	multimedijalni.Ispis();
 	//nazivPoglavlja, ocjena
 	multimedijalni.OcijeniPoglavlje("Uvod", 8);
-*/
+
 
 	/*funkcija DodajZavrsniRad ima zadatak da odredjenom nastavniku dodijeli mentorstvo na zavrsnom radu. sprijeciti dodavanje zavrsnih radova sa istom temom kao i mogucnost da jedan student kod istog nastavnika posjeduje vise zavrsnih radova*/
 	//brojIndeksa, zavrsniRad
-	/* if (nastavnici[0]->DodajZavrsniRad(multimedijalni))
+	if (nastavnici[0]->DodajZavrsniRad(multimedijalni))
 		cout << "Zavrsni rad uspjesno dodat!" << endl;
 	if (nastavnici[0]->DodajZavrsniRad(podrsa_operaterima))
 		cout << "Zavrsni rad uspjesno dodat!" << endl;
@@ -214,7 +213,7 @@ int main() {
 		cout << "Zavrsni rad nije dodat!" << endl;
 	if (nastavnici[1]->DodajZavrsniRad(analiza_sigurnosti))
 		cout << "Zavrsni rad uspjesno dodat!" << endl;
-*/
+
 
 	/*funkcija ZakaziOdbranuRada ima zadatak da studentu sa proslijedjenim brojem indeksa zakaze odbranu zavrsnog rada sto podrazumijeva
 	izracunavanje konacne ocjene i definisanje datuma odbrane. odbrana rada se moze zakazati samo studentu koji je rad prethodno prijavio.
@@ -257,3 +256,5 @@ int main() {
 	system("pause>0");
 	return 0;
 }
+
+
