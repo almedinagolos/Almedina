@@ -67,43 +67,22 @@ struct ZavrsniRad {
 		_brojIndeksa = AlocirajNizKaraktera(brojIndeksa);
 		_tema = AlocirajNizKaraktera(nazivTeme);
 		_datumOdbrane = AlocirajNizKaraktera(not_set);
-		
 	}
-	void Kopiraj(ZavrsniRad &rad) {
-		_konacnaOcjena = rad._konacnaOcjena;
-		_brojIndeksa = AlocirajNizKaraktera(rad._brojIndeksa);
-		_tema = AlocirajNizKaraktera(rad._tema);
-		if (rad._datumOdbrane != nullptr) 
-			_datumOdbrane = AlocirajNizKaraktera(rad._datumOdbrane);
-		for (int i = 0; i < max_zavrsnih; i++)
+	void Kopiraj(ZavrsniRad z) {
+		_brojIndeksa = AlocirajNizKaraktera(z._brojIndeksa);
+		_tema = AlocirajNizKaraktera(z._tema);
+		if (z._datumOdbrane != nullptr)
+			_datumOdbrane = AlocirajNizKaraktera(z._datumOdbrane);
+		_konacnaOcjena = z._konacnaOcjena;
+
+		for (int i = 0; i < max_poglavlja; i++)
 		{
-			if (rad._poglavljaRada[i] != nullptr)
+			if (z._poglavljaRada[i] != nullptr)
 			{
 				_poglavljaRada[i] = new Poglavlje;
-				_poglavljaRada[i]->Unos(rad._poglavljaRada[i]->_naslov, rad._poglavljaRada[i]->_sadrzaj);
+				_poglavljaRada[i]->Unos(z._poglavljaRada[i]->_naslov, z._poglavljaRada[i]->_sadrzaj);
 			}
 		}
-
-	}
-	void Dealociraj() {
-		delete[] _tema; _tema = nullptr;
-		delete[] _datumOdbrane; _datumOdbrane = nullptr;
-		delete[] _brojIndeksa; _brojIndeksa = nullptr;
-		for (size_t i = 0; i < max_poglavlja; i++) {
-			_poglavljaRada[i]->Dealociraj();
-			delete[] _poglavljaRada[i];
-			_poglavljaRada[i] = nullptr;
-		}
-	}
-	void Ispis() {
-		cout << "Tema rada: " << _tema << endl;
-		cout << "Sadrzaj: " << endl;
-		for (size_t i = 0; i < max_poglavlja; i++) {
-			if(_poglavljaRada[i]!=nullptr)
-			_poglavljaRada[i]->Ispis();
-		
-		}
-		cout << "Datum odbrane rada: " << _datumOdbrane << endl << " Ocjena: " << _konacnaOcjena << endl;
 	}
 	void DodajPoglavlje(const char* nazivPoglavlja, const char* sadrzajPoglavlja) {
 		for (int i = 0; i < max_poglavlja; i++)
@@ -152,6 +131,28 @@ struct ZavrsniRad {
 			}
 		}
 	}
+	void Dealociraj() {
+		delete[] _tema; _tema = nullptr;
+		delete[] _datumOdbrane; _datumOdbrane = nullptr;
+		delete[] _brojIndeksa; _brojIndeksa = nullptr;
+		for (size_t i = 0; i < max_poglavlja; i++) {
+			if (_poglavljaRada[i] != nullptr) {
+				_poglavljaRada[i]->Dealociraj();
+				delete[] _poglavljaRada[i];
+			}
+			_poglavljaRada[i] = nullptr;
+		}
+	}
+	void Ispis() {
+		cout << "Tema rada: " << _tema << endl;
+		cout << "Sadrzaj: " << endl;
+		for (size_t i = 0; i < max_poglavlja; i++)
+		{
+			if (_poglavljaRada[i] != nullptr)
+				_poglavljaRada[i]->Ispis();
+		}
+		cout << "Datum odbrane rada: " << _datumOdbrane << endl << " Ocjena: " << _konacnaOcjena << endl;
+	}
 };
 struct Nastavnik {
 	char* _imePrezime;
@@ -164,52 +165,17 @@ struct Nastavnik {
 	void Dealociraj() {
 		delete[] _imePrezime; _imePrezime = nullptr;
 		for (size_t i = 0; i < _trenutnoZavrsnih; i++)
+		{
 			_teme[i].Dealociraj();
-		delete[] _teme;
+		}
+			delete[] _teme;
 	}
 	void Ispis() {
 		cout << crt << _imePrezime << crt;
 		for (size_t i = 0; i < max_zavrsnih; i++)
-		{
 			_teme[i].Ispis();
-		}
-	}
-	/*bool DodajZavrsniRad(ZavrsniRad rad)
-	{
-		for (int i = 0; i < _trenutnoZavrsnih; i++)
-		{
-			if (strcmp(_teme[i]._tema, rad._tema) == 0 || strcmp(_teme[i]._brojIndeksa, rad._brojIndeksa) == 0)
-				return false;
-		}
-		ZavrsniRad* temp = new ZavrsniRad[_trenutnoZavrsnih + 1];
-		for (int i = 0; i < _trenutnoZavrsnih; i++)
-		{
-			temp[i].Unos(_teme[i]._brojIndeksa, _teme[i]._tema);
-			_teme[i].Dealociraj();
-		}
-		delete[] _teme;
-		temp[_trenutnoZavrsnih].Unos(rad._brojIndeksa, rad._tema);
-		_teme = temp;
-		_trenutnoZavrsnih++;
-		return true;
-	}*/
-	bool DodajZavrsniRad(ZavrsniRad rad) {
-		for (int i = 0; i < _trenutnoZavrsnih; i++)
-		{
-			if (strcmp(_teme[i]._tema, rad._tema) == 0 || strcmp(_teme[i]._brojIndeksa, rad._brojIndeksa) == 0)
-				return false;
-		}
-		for (int i = 0; i < _trenutnoZavrsnih; i++)
-		{
-			ZavrsniRad* temp = new ZavrsniRad[_trenutnoZavrsnih + 1];
-			temp->Kopiraj(rad);
-			return true;
-		}
-		return false;
 	}
 
-	
-	
 };
 
 int main() {
@@ -232,9 +198,7 @@ int main() {
 	ZavrsniRad kriptografija;
 	kriptografija.Unos("IB120021", "Primjena teorije informacija u procesu generisanja kriptografskih ključeva");
 
-	/*u zavrsni rad dodaje novo poglavlje i njegov sadrzaj. ukoliko poglavlje vec postoji u zavrsnom radu, 
-	funkcija tom poglavlju treba dodati novi sadrzaj i pri tome zadrzi postojeci (izmedju postojeceg i novog sadrzaja se dodaje prazan prostor). 
-	u slucaju da poglavlje ne postoji, ono se dodaje zajedno sa sadrzajem*/
+	/*u zavrsni rad dodaje novo poglavlje i njegov sadrzaj. ukoliko poglavlje vec postoji u zavrsnom radu, funkcija tom poglavlju treba dodati novi sadrzaj i pri tome zadrzi postojeci (izmedju postojeceg i novog sadrzaja se dodaje prazan prostor). u slucaju da poglavlje ne postoji, ono se dodaje zajedno sa sadrzajem*/
 	//parametri: nazivPoglavlja, sadrzajPoglavlja
 	multimedijalni.DodajPoglavlje("Uvod", "U ovom poglavlju ce biti rijeci");
 	multimedijalni.DodajPoglavlje("Uvod", "o multimedijalnim sistemima koji se danas koriste");
@@ -244,21 +208,20 @@ int main() {
 
 	//nazivPoglavlja, ocjena
 	multimedijalni.OcijeniPoglavlje("Uvod", 8);
-	multimedijalni.Ispis();
 
-	/*funkcija DodajZavrsniRad ima zadatak da odredjenom nastavniku dodijeli mentorstvo na zavrsnom radu. 
-	sprijeciti dodavanje zavrsnih radova sa istom temom kao i mogucnost da jedan student kod istog nastavnika posjeduje vise zavrsnih radova*/
+
+	/*funkcija DodajZavrsniRad ima zadatak da odredjenom nastavniku dodijeli mentorstvo na zavrsnom radu. sprijeciti dodavanje zavrsnih radova sa istom temom kao i mogucnost da jedan student kod istog nastavnika posjeduje vise zavrsnih radova*/
 	// zavrsniRad
-	if (nastavnici[0]->DodajZavrsniRad(multimedijalni))
-		cout << "Zavrsni rad uspjesno dodat!" << endl;
-	if (nastavnici[0]->DodajZavrsniRad(podrsa_operaterima))
-		cout << "Zavrsni rad uspjesno dodat!" << endl;
-	if (!nastavnici[0]->DodajZavrsniRad(podrsa_operaterima))//dupliranje rada, onemoguciti dodavanje
-		cout << "Zavrsni rad nije dodat!" << endl;
-	if (!nastavnici[0]->DodajZavrsniRad(kriptografija)) //studentu vec dodijeljen rad, onemoguciti dodavanje
-		cout << "Zavrsni rad nije dodat!" << endl;
-	if (nastavnici[1]->DodajZavrsniRad(analiza_sigurnosti))
-		cout << "Zavrsni rad uspjesno dodat!" << endl;
+	//if (nastavnici[0]->DodajZavrsniRad(multimedijalni))
+	//	cout << "Zavrsni rad uspjesno dodat!" << endl;
+	//if (nastavnici[0]->DodajZavrsniRad(podrsa_operaterima))
+	//	cout << "Zavrsni rad uspjesno dodat!" << endl;
+	//if (!nastavnici[0]->DodajZavrsniRad(podrsa_operaterima))//dupliranje rada, onemoguciti dodavanje
+	//	cout << "Zavrsni rad nije dodat!" << endl;
+	//if (!nastavnici[0]->DodajZavrsniRad(kriptografija)) //studentu vec dodijeljen rad, onemoguciti dodavanje
+	//	cout << "Zavrsni rad nije dodat!" << endl;
+	//if (nastavnici[1]->DodajZavrsniRad(analiza_sigurnosti))
+	//	cout << "Zavrsni rad uspjesno dodat!" << endl;
 
 
 	/*funkcija ZakaziOdbranuRada ima zadatak da studentu sa proslijedjenim brojem indeksa zakaze odbranu zavrsnog rada sto podrazumijeva
@@ -274,15 +237,15 @@ int main() {
 //paramteri: brojIndeksa, datumOdbrane
 	/*ZavrsniRad* zr1 = nastavnici[0]->ZakaziOdbranuRada("IB120021", "25.09.2019");
 	if (zr1 != nullptr)
-		zr1->Ispis();*/
-
+		zr1->Ispis();
+*/
 	//zr1 = nastavnici[0]->ZakaziOdbranuRada("IB180081", "25.09.2019");//student sa brojem indeksa IB180081 jos uvijek nije prijavio rad
 	//if (zr1 == nullptr)
 	//	cout << "Odbrana ne moze biti zakazana!" << endl;
 
-	////ispisuje sve podatke o nastavniku i njegovim mentorstvima
-	//nastavnici[0]->Ispis();
-	//nastavnici[1]->Ispis();
+	//ispisuje sve podatke o nastavniku i njegovim mentorstvima
+	nastavnici[0]->Ispis();
+	nastavnici[1]->Ispis();
 
 	/*rekurzivna funkcija PronadjiNajStudenta ima zadatak da pronadje posljednjeg studenta koji je zavrsni rad odbranio kod
 	nastavnika/mentora, te tom prilikom ostvario (odnosi se na studenta) ocjenu vecu od proslijedjene (npr. 8.2)*/
@@ -291,11 +254,11 @@ int main() {
 	if (indeksStudenta != nullptr)
 		cout << crt << "Posljednji student " << " -> " << indeksStudenta << crt;
 */
-	/*for (int i = 0; i < max; i++) {
+	for (int i = 0; i < max; i++) {
 		nastavnici[i]->Dealociraj();
 		delete nastavnici[i];
 		nastavnici[i] = nullptr;
-	}*/
+	}
 	system("pause>0");
 	return 0;
 }
