@@ -135,7 +135,7 @@ struct ZavrsniRad {
 				_poglavljaRada[i] = new Poglavlje;
 				_poglavljaRada[i]->Unos(rad._poglavljaRada[i]->_naslov, rad._poglavljaRada[i]->_sadrzaj);
 				_poglavljaRada[i]->OcijeniPoglavlje(rad._poglavljaRada[i]->_ocjena);
-				rad.Dealociraj();//ovdje onda ne trebas dealocirati i obrnuto
+				rad.Dealociraj();
 			}
 		}
 	}
@@ -172,7 +172,7 @@ struct Nastavnik {
 		for (int i = 0; i < _trenutnoZavrsnih; i++)
 		{
 			temp[i].Kopiraj(_teme[i]);
-			/*_teme[i].Dealociraj(); ako ovdej dealociras idi na liniju 138*/
+			
 		}
 		if (_teme != nullptr)
 			delete[] _teme;
