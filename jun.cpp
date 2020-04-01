@@ -254,7 +254,27 @@ public:
 	broj telefona,
 	u okviru zasebnog thread-a se salje SMS sa sadrzajem "Uspjesno ste okoncali aktivnosti u okviru X razreda sa 
 	prosjecnom ocjenom X.X"*/
-	 
+	 pair<Polaznik*, float> GetNajboljegUcenika(){
+		Polaznik* najpolaznik = nullptr;
+		float prosjek = 0;		
+		for (vector<Ucenik>::iterator i = _ucenici.begin(); i != _ucenici.end(); i++)
+		{
+
+			float prosjekTrenutno = 0;
+			
+			for (size_t j = 0; j < i->GetAktivnosti().GetTrenutno(); j++)
+			{
+				prosjekTrenutno += i->GetAktivnosti().GetElement2(j).GetOcjenu();
+			}
+			prosjekTrenutno /= i->GetAktivnosti().GetTrenutno();
+			if (prosjek < prosjekTrenutno) {
+				prosjekTrenutno = prosjek;
+				najpolaznik = i._Ptr;
+
+			}
+		}
+		return pair<Polaznik*, float>(najpolaznik, prosjek);
+	}
 };
 
 int main() {
@@ -325,8 +345,8 @@ int main() {
   cout << gimnazijaMostar << endl;
 
 
-	/*pair<Polaznik*, float> par = gimnazijaMostar.GetNajboljegUcenika();
-	cout << "Najbolji ucenik je " << par.first->GetImePrezime() << " sa prosjekom " << par.second << endl;*/
+	pair<Polaznik*, float> par = gimnazijaMostar.GetNajboljegUcenika();
+	cout << "Najbolji ucenik je " << par.first->GetImePrezime() << " sa prosjekom " << par.second << endl;
 
 	/*U fajl (npr. Gimnazija.txt) upisati podatke (podatke upisati kao obicni tekst) o skoli i svim ucenicima.
 	Nakon upisa, potrebno je ispisati sadrzaj fajla. Parametar tipa bool oznacava da li ce ranije dodani sadrzaj fajla prethodno biti pobrisan*/
