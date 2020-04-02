@@ -254,23 +254,22 @@ public:
 	broj telefona,
 	u okviru zasebnog thread-a se salje SMS sa sadrzajem "Uspjesno ste okoncali aktivnosti u okviru X razreda sa 
 	prosjecnom ocjenom X.X"*/
-	 pair<Polaznik*, float> GetNajboljegUcenika(){
+	 pair<Polaznik*, float> GetNajboljegUcenika() {
 		Polaznik* najpolaznik = nullptr;
-		float prosjek = 0;		
+		float prosjek = 0;
 		for (vector<Ucenik>::iterator i = _ucenici.begin(); i != _ucenici.end(); i++)
 		{
-
-			float prosjekTrenutno = 0;
-			
-			for (size_t j = 0; j < i->GetAktivnosti().GetTrenutno(); j++)
-			{
-				prosjekTrenutno += i->GetAktivnosti().GetElement2(j).GetOcjenu();
-			}
-			prosjekTrenutno /= i->GetAktivnosti().GetTrenutno();
-			if (prosjek < prosjekTrenutno) {
-				prosjekTrenutno = prosjek;
-				najpolaznik = i._Ptr;
-
+			if (i->GetAktivnosti().GetTrenutno() != 0) {
+				float prosjekTrenutno = 0;
+				for (size_t j = 0; j < i->GetAktivnosti().GetTrenutno(); j++)
+				{
+					prosjekTrenutno += i->GetAktivnosti().GetElement2(j).GetOcjenu();
+				}
+				prosjekTrenutno /= i->GetAktivnosti().GetTrenutno();
+				if (prosjekTrenutno < prosjek) {
+					prosjekTrenutno = prosjek;
+					najpolaznik = i._Ptr;
+				}
 			}
 		}
 		return pair<Polaznik*, float>(najpolaznik, prosjek);
