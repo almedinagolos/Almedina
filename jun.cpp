@@ -1,8 +1,11 @@
 #include<iostream>
-#include<vector>
-#include<regex>
-#include<iterator>
-#include<string>
+#include <vector>
+#include <iterator>
+#include <mutex>
+#include <thread>
+#include <fstream>
+#include <string>
+#include <regex>
 
 using namespace std;
 
@@ -105,10 +108,10 @@ public:
 		_trenutnoElemenata++;
 
 		if (_sortiranje == 0) {
-			
+
 			for (size_t i = 0; i < _trenutnoElemenata - 1; i++)
 			{
-				if (*_elementi1[i] > *_elementi1[i + 1]) {
+				if (*_elementi1[i] > * _elementi1[i + 1]) {
 					T1 temp1 = *_elementi1[i];
 					T2 temp2 = *_elementi2[i];
 					*_elementi1[i] = *_elementi1[i + 1];
@@ -134,7 +137,7 @@ public:
 			}
 		}
 	}
-	
+
 
 };
 
@@ -161,9 +164,12 @@ public:
 		COUT << *obj._razred << " " << obj._ocjena << " " << obj._opis << endl;
 		return COUT;
 	}
-	/*bool operator == (const Aktivnost &a) {
-		
-	}*/
+	bool operator==(const Aktivnost& a)
+	{
+		if (_opis == a._opis)
+			return true;
+		else return false;
+	}
 };
 
 class Polaznik {
@@ -189,14 +195,20 @@ public:
 	virtual void PredstaviSe() = 0;
 };
 
-class Ucenik: public Polaznik {
+class Ucenik : public Polaznik {
 	Kolekcija<Predmet, Aktivnost, 16>* _aktivnosti;
 public:
-	Ucenik(string imePrezime, string brojTelefona):Polaznik(imePrezime, brojTelefona) {
-		_aktivnosti = nullptr;
+	Ucenik(string imePrezime, string brojTelefona) :Polaznik(imePrezime, brojTelefona) {
+		_aktivnosti = new Kolekcija<Predmet, Aktivnost, 16>();
+	}
+	Ucenik(const Ucenik& original) :Polaznik(original)
+	{
+		_aktivnosti = new Kolekcija<Predmet, Aktivnost, 16>(*original._aktivnosti);
+
 	}
 	~Ucenik() { delete _aktivnosti; _aktivnosti = nullptr; }
 	Kolekcija<Predmet, Aktivnost, 16>& GetAktivnosti() { return *_aktivnosti; };
+	Kolekcija<Predmet, Aktivnost, 16>* GetAktivnosti2() { return _aktivnosti; };
 	friend ostream& operator<<(ostream& COUT, Ucenik& n)
 	{
 		COUT << "PODACI O UCENIKU I NJEGOVIM AKTIVNOSTIMA....IMPLEMENTIRATI" << endl;
@@ -213,7 +225,7 @@ public:
 	void PredstaviSe() {
 		cout << *this << endl;
 	}
-	
+
 };
 class Skola {
 	char* _naziv;
@@ -252,27 +264,103 @@ public:
 	aktivnosti iz istog predmeta*/
 	/*u slucaju da je ucenik uspjesno (ocjenom vecom od 1) realizovao aktivnosti na nivou odredjenog razreda, te posjeduje validan
 	broj telefona,
-	u okviru zasebnog thread-a se salje SMS sa sadrzajem "Uspjesno ste okoncali aktivnosti u okviru X razreda sa 
+	u okviru zasebnog thread-a se salje SMS sa sadrzajem "Uspjesno ste okoncali aktivnosti u okviru X razreda sa
 	prosjecnom ocjenom X.X"*/
-	 pair<Polaznik*, float> GetNajboljegUcenika() {
+	/*bool DodajAktivnost(string imePrezime, Predmet predmet, Aktivnost a){
+		for (vector<Ucenik>::iterator i = _ucenici.begin(); i != _ucenici.end(); i++)
+		{
+			for (size_t j = 0; j < i->GetAktivnosti().GetTrenutno(); j++)
+			{
+				if (i->GetAktivnosti().GetElement2(j).GetRazred() == a.GetRazred()) {
+					if (i->GetAktivnosti().GetTrenutno() > 3) return false;
+					if (i->GetAktivnosti().GetElement1(j) == predmet) return false;
+					i->GetAktivnosti().AddElement(predmet, a);
+					return true;
+				}
+			}			
+		}
+	}*/
+	bool DodajAktivnost(string imePrezime, Predmet predmet, Aktivnost nekaAktivnost) {
+		int brojac = 0;
+		for (int i = 0; i < _ucenici.size(); i++) {
+			if (!strcmp(imePrezime.c_str(), _ucenici[i].GetImePrezime())) {
+				for (int j = 0; j < _ucenici[i].GetAktivnosti().GetTrenutno(); j++) {
+					if (_ucenici[i].GetAktivnosti().GetElement2(j).GetRazred() == nekaAktivnost.GetRazred()) {
+						brojac++;
+						if (_ucenici[i].GetAktivnosti().GetElement1(j) == predmet) {
+							return false;
+
+						}
+					}
+				}
+			}
+		}
+		if (brojac > 4) {
+			return false;
+		}
+		for (int i = 0; i < _ucenici.size(); i++) {
+			if (!strcmp(imePrezime.c_str(), _ucenici[i].GetImePrezime())) {
+				_ucenici[i].GetAktivnosti().AddElement(predmet, nekaAktivnost);
+				return true;
+			}
+		}
+	}
+
+	pair<Polaznik*, float> GetNajboljegUcenika() {
 		Polaznik* najpolaznik = nullptr;
 		float prosjek = 0;
 		for (vector<Ucenik>::iterator i = _ucenici.begin(); i != _ucenici.end(); i++)
 		{
-			if (i->GetAktivnosti().GetTrenutno() != 0) {
-				float prosjekTrenutno = 0;
-				for (size_t j = 0; j < i->GetAktivnosti().GetTrenutno(); j++)
-				{
-					prosjekTrenutno += i->GetAktivnosti().GetElement2(j).GetOcjenu();
-				}
-				prosjekTrenutno /= i->GetAktivnosti().GetTrenutno();
-				if (prosjekTrenutno < prosjek) {
-					prosjekTrenutno = prosjek;
-					najpolaznik = i._Ptr;
-				}
+			float prosjekTrenutno = 0;
+			for (size_t j = 0; j < i->GetAktivnosti().GetTrenutno(); j++)
+			{
+				prosjekTrenutno += i->GetAktivnosti().GetElement2(j).GetOcjenu();
+			}
+			prosjekTrenutno /= i->GetAktivnosti().GetTrenutno();
+			if (prosjekTrenutno < prosjek) {
+				prosjekTrenutno = prosjek;
+				najpolaznik = i._Ptr;
 			}
 		}
 		return pair<Polaznik*, float>(najpolaznik, prosjek);
+	}
+	bool SpasiUFajl(string fajl, bool dodaj = false)
+	{
+		if (dodaj)
+		{
+			ofstream upis(fajl, ios::app);
+			upis << "Skola: " << _naziv << endl << "Ucenici: " << endl;
+			for (vector<Ucenik>::iterator i = _ucenici.begin(); i != _ucenici.end(); i++)
+			{
+				upis << *i << endl;
+			}
+			upis.close();
+			ifstream ispis(fajl);
+			char znak;
+			while (ispis.get(znak))
+				cout << znak;
+			cout << endl;
+			ispis.close();
+			return true;
+		}
+		else
+		{
+			ofstream upis("Gimnazija.txt", ios::out);
+			upis << "Skola: " << _naziv << endl << "Ucenici: " << endl;
+			for (vector<Ucenik>::iterator i = _ucenici.begin(); i != _ucenici.end(); i++)
+			{
+				upis << *i << endl;
+			}
+			upis.close();
+			ifstream ispis("Gimnazija.txt");
+			char znak;
+			while (ispis.get(znak))
+				cout << znak;
+			cout << endl;
+			ispis.close();
+			return true;
+		}
+		return false;
 	}
 };
 
@@ -282,7 +370,7 @@ int main() {
 		kolekcija1.AddElement(1, 2);
 		//dupliranje elemenata nije dozvoljeno
 		kolekcija1.AddElement(1, 2);
-		
+
 	}
 	catch (exception & ex) {
 		cout << ex.what();
@@ -328,7 +416,7 @@ int main() {
 	}
 
 	if (gimnazijaMostar.DodajAktivnost("Jasmin Azemovic", MATEMATIKA, Aktivnost(I, 4, "Priprema za takmicenje iz Matematije koje se odrzava u Konjicu 07.02.2019")))
-		cout << "Aktivnost uspjesno dodana" << endl;	
+		cout << "Aktivnost uspjesno dodana" << endl;
 	if (!gimnazijaMostar.DodajAktivnost("Jasmin Azemovic", MATEMATIKA, Aktivnost(I, 4, "Aktivnosti iz matematike")))
 		cout << "Aktivnost nije uspjesno dodana" << endl;
 	if (gimnazijaMostar.DodajAktivnost("Jasmin Azemovic", HEMIJA, Aktivnost(I, 5, "Priprema otopina za vjezbe iz predmeta Hemija")))
@@ -341,19 +429,22 @@ int main() {
 		cout << "Aktivnost uspjesno dodana" << endl;
 
 	//ispisuje sve ucenike i njihove aktivnosti
-  cout << gimnazijaMostar << endl;
+	cout << gimnazijaMostar << endl;
 
 
 	pair<Polaznik*, float> par = gimnazijaMostar.GetNajboljegUcenika();
-	cout << "Najbolji ucenik je " << par.first->GetImePrezime() << " sa prosjekom " << par.second << endl;
+	if (par.first != nullptr)
+		cout << "Najbolji ucenik je " << par.first->GetImePrezime() << " sa prosjekom " << par.second << endl;
+	else
+		cout << "Nema aktivnosti";
 
 	/*U fajl (npr. Gimnazija.txt) upisati podatke (podatke upisati kao obicni tekst) o skoli i svim ucenicima.
 	Nakon upisa, potrebno je ispisati sadrzaj fajla. Parametar tipa bool oznacava da li ce ranije dodani sadrzaj fajla prethodno biti pobrisan*/
 
-	/*if (gimnazijaMostar.SpasiUFajl("Gimnazija.txt"))
+	if (gimnazijaMostar.SpasiUFajl("Gimnazija.txt"))
 		cout << "Podaci o ucenicima uspjesno pohranjeni u fajl" << endl;
 	if (gimnazijaMostar.SpasiUFajl("Gimnazija.txt", true))
-		cout << "Podaci o ucenicima uspjesno pohranjeni u fajl" << endl;*/
+		cout << "Podaci o ucenicima uspjesno pohranjeni u fajl" << endl;
 
 	cin.get();
 	system("pause>0");
