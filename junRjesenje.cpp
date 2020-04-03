@@ -306,23 +306,24 @@ public:
 		}
 	}
 
-	pair<Polaznik*, float> GetNajboljegUcenika() {
-		Polaznik* najpolaznik = nullptr;
+	pair<Polaznik*, float>GetNajboljegUcenika() {
+		Polaznik* p = nullptr;
 		float prosjek = 0;
+		
 		for (vector<Ucenik>::iterator i = _ucenici.begin(); i != _ucenici.end(); i++)
 		{
-			float prosjekTrenutno = 0;
+			float trenutnoProsjek = 0;
 			for (size_t j = 0; j < i->GetAktivnosti().GetTrenutno(); j++)
 			{
-				prosjekTrenutno += i->GetAktivnosti().GetElement2(j).GetOcjenu();
+				trenutnoProsjek += i->GetAktivnosti().GetElement2(j).GetOcjenu();
 			}
-			prosjekTrenutno /= i->GetAktivnosti().GetTrenutno();
-			if (prosjekTrenutno < prosjek) {
-				prosjekTrenutno = prosjek;
-				najpolaznik = i._Ptr;
+			trenutnoProsjek /= i->GetAktivnosti().GetTrenutno();
+			if (prosjek < trenutnoProsjek) {
+				prosjek = trenutnoProsjek;
+				p = i._Ptr;
 			}
 		}
-		return pair<Polaznik*, float>(najpolaznik, prosjek);
+		return pair<Polaznik*, float>(p, prosjek);
 	}
 	bool SpasiUFajl(string fajl, bool dodaj = false)
 	{
