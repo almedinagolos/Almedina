@@ -152,7 +152,6 @@ public:
 	}
 	float GetKonacnaOcjena() { return _konacnaOcjena; }
 	bool operator==(const ZavrsniRad& z) {
-		if(_tema != nullptr)
 		return strcmp(_tema, z._tema) == 0;
 	}
 	~ZavrsniRad() {
