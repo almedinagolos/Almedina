@@ -48,6 +48,15 @@ public:
 		_trenutnoElemenata = new int(0);
 		_keyElement = keyElement;
 	}
+	Kolekcija(const Kolekcija &k){
+		_trenutnoElemenata = new int(*k._trenutnoElemenata);
+		_keyElement = k._keyElement;
+		for (size_t i = 0; i < *k._trenutnoElemenata; i++)
+		{
+			_elementi1[i] = k._elementi1[i];
+			_elementi2[i] = k._elementi2[i];
+		}
+	}
 	~Kolekcija() {
 		delete _trenutnoElemenata;
 		_trenutnoElemenata = nullptr;
