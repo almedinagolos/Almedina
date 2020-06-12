@@ -1,0 +1,175 @@
+*{
+    box-sizing: border-box;
+}
+html, body{
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+}
+nav{
+    width: 300px;
+    position: fixed;
+    top:0;
+    bottom:0;
+    background-color: blue;
+    color:white;
+}
+#Izbornik{
+    color:white;
+}
+span{
+    font-weight: bold;
+    margin-left: 10px;
+}
+#Izbornik a{
+    text-decoration: none;
+    display: block;
+    margin-left: 20px;
+    padding-top: 20px;
+    color:white;
+    font-weight: bold;
+}
+#Izbornik a:hover{
+    background-color: #b6bfce;
+    width: 200px;
+
+}
+#IzbornikDugme{
+    display: none;
+}
+#wrapper{
+    margin-left: 300px;
+padding: 20px 80px;
+
+}
+div h1{
+    padding-top: 20px;
+    
+}
+.VilaKolonaWrapper{
+    float:left;
+    width:33%;
+   text-align: center;
+}
+.VilaKolonaWrapper img{
+    padding:15px;
+}
+.VilaKolonaWrapper img:hover{
+    opacity: 0.8;
+}
+.Kontejner{
+  overflow: hidden;
+}
+img{
+    width: 100%;
+    height: auto;
+}
+#wrapper div:first-child hr{
+   max-width: 50px;
+   margin: 0 0 15px;
+
+}
+label{
+    display: block;
+    font-size: 13px;
+    padding-top: 5px;
+}
+input{
+    width: 100%;
+    border: 1px solid grey;
+    padding:8px;
+    font-size: 15px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+input#Slika{
+   border:1px solid grey;
+   background-color: lightgray;
+}
+button{
+    width: 100%;
+   border:0;
+   background-color: blue;
+   padding:15px;
+   color:#fff;
+   margin-top: 20px;
+}
+h3{
+    font-weight: normal;
+    margin: 0;
+}
+.KolonaTextbox {
+width:33%;
+float: left;
+}
+@media only screen and (max-width: 600px)
+{
+
+}
+@media only screen and (max-width: 600px) {
+    th, td {
+        font-size: 12px;
+    }
+    #IzbornikDugme {
+        display:inline;
+    }
+    #Izbornik {
+        display:none;
+    }
+    nav {
+        line-height: 55px;
+        height:60px;
+        width:100%;
+        position:static;
+        margin:0;
+        padding:0;
+    }
+    nav div {
+        margin:0 !important;
+    }
+    .IzbornikStavka {
+        text-align: center;
+        background:#1b5fc2;
+    }
+    .VilaKolonaWrapper {
+        width: 100%;
+        margin-bottom:25px;
+    }
+    div#wrapper {
+        margin:0;
+        margin-top:5px;
+    }
+    nav a, nav span {
+        display: inline;
+    }
+    nav span {
+        margin-left: 20px;
+    }
+    nav a{
+        line-height: 35px;
+    }
+    h1{
+        text-align: left;
+        line-height: 60px;
+    }
+}
+
+--
+.VilaKolonaOkvir:hover {
+    opacity:0.8;
+    cursor:pointer;
+}
+
+.KolonaTextbox div {
+    height: 37px;
+}
+#Izbornik a:hover {
+    background:#367ee4;
+    }
+    label {
+        margin-top: 15px;
+        display: block;
+    }
+    .vidljivo {
+       display:block !important;
+    }
