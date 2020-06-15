@@ -266,20 +266,7 @@ public:
 	broj telefona,
 	u okviru zasebnog thread-a se salje SMS sa sadrzajem "Uspjesno ste okoncali aktivnosti u okviru X razreda sa
 	prosjecnom ocjenom X.X"*/
-	/*bool DodajAktivnost(string imePrezime, Predmet predmet, Aktivnost a){
-		for (vector<Ucenik>::iterator i = _ucenici.begin(); i != _ucenici.end(); i++)
-		{
-			for (size_t j = 0; j < i->GetAktivnosti().GetTrenutno(); j++)
-			{
-				if (i->GetAktivnosti().GetElement2(j).GetRazred() == a.GetRazred()) {
-					if (i->GetAktivnosti().GetTrenutno() > 3) return false;
-					if (i->GetAktivnosti().GetElement1(j) == predmet) return false;
-					i->GetAktivnosti().AddElement(predmet, a);
-					return true;
-				}
-			}			
-		}
-	}*/
+	
 	bool DodajAktivnost(string imePrezime, Predmet predmet, Aktivnost nekaAktivnost) {
 		int brojac = 0;
 		for (int i = 0; i < _ucenici.size(); i++) {
