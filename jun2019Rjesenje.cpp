@@ -183,7 +183,11 @@ protected:
 	}
 public:
 	Polaznik(string imePrezime, string brojTelefona) : _imePrezime(AlocirajNizKaraktera(imePrezime.c_str())) {
-		_brojTelefona = brojTelefona;
+		if (ispravanBrojTelefona(brojTelefona)) {
+			_brojTelefona = brojTelefona;
+		}
+		else
+		_brojTelefona = "NOT_SET";
 	}
 	Polaznik(const Polaznik& obj) {
 		_imePrezime = AlocirajNizKaraktera(obj._imePrezime);
