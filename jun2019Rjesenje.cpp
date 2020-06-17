@@ -274,7 +274,7 @@ public:
 	bool DodajAktivnost(string imePrezime, Predmet predmet, Aktivnost nekaAktivnost) {
 		int brojac = 0;
 		for (int i = 0; i < _ucenici.size(); i++) {
-			if (!strcmp(imePrezime.c_str(), _ucenici[i].GetImePrezime())) {
+			if (strcmp(imePrezime.c_str(), _ucenici[i].GetImePrezime())) {
 				for (int j = 0; j < _ucenici[i].GetAktivnosti().GetTrenutno(); j++) {
 					if (_ucenici[i].GetAktivnosti().GetElement2(j).GetRazred() == nekaAktivnost.GetRazred()) {
 						brojac++;
@@ -290,7 +290,7 @@ public:
 			return false;
 		}
 		for (int i = 0; i < _ucenici.size(); i++) {
-			if (!strcmp(imePrezime.c_str(), _ucenici[i].GetImePrezime())) {
+			if (strcmp(imePrezime.c_str(), _ucenici[i].GetImePrezime())) {
 				_ucenici[i].GetAktivnosti().AddElement(predmet, nekaAktivnost);
 				return true;
 			}
