@@ -274,49 +274,28 @@ public:
 	cast nam je pozvati vas na dodjelu nagrada za najbolje studente koja ce se odrzatu u na FIT-u 03.07.2019. godine."	.
 	funkcija treba da vrati sadrzaj svih poslatih email poruka, a ukoliko niti jedan od nastavnika ne posjeduje evidentirano mentorstvo na
 	zavrsnom radu, funkcija vraca not_set*/
-string PosaljiPozivZaDodjeluNagrada(Nastavnik** nastavnici, int max, int ocjena) {
-	string poruka = not_set;
-	float prosjek = 0;
-	int brojac = 0;
-	Nastavnik* n = nullptr;
+string PosaljiPozivZaDodjeluNagrada(Nastavnik* n[], int max, double ocjena) {
+	stringstream s;
+	bool provjera = false;
 	for (size_t i = 0; i < max; i++)
 	{
-		float trenutniProsjek = 0;
-		for (size_t j = 0; j < nastavnici[i]->GetTeme().getTrenutno(); j++)
+		for (size_t j = 0; j < n[i]->GetTeme().getTrenutno(); j++)
 		{
-			if (nastavnici[i]->GetTeme().getElement2(j).GetOcjena() > 5) {
-				trenutniProsjek += nastavnici[i]->GetTeme().getElement2(j).GetOcjena();
-				brojac++;
-			}
-		}
-		if (brojac != 0) {
-			trenutniProsjek /= brojac;
-			if (prosjek > trenutniProsjek) {
-				prosjek = trenutniProsjek;
-				n = nastavnici[i];
-			}
-		}
-	}
-	if (n != nullptr) {
-		for (size_t i = 0; i < n->GetTeme().getTrenutno(); i++)
-		{
-			if (n->GetTeme().getElement2(i).GetKonacnaOcjena() >= ocjena) {
-				string temp = "Postovani" + n->GetTeme().getElement1(i) + ", uzimajuci u obzir cinjenicu da ste kod mentora " + n->GetImePrezime() + " uspjesno odbranili rad sa ocjenom " + to_string(n->GetTeme().getElement2(i).GetKonacnaOcjena()) + " cast nam je pozvati vas na dodjelu nagrada za najbolje studente koja ce se odrzatu u na FIT - u 20.09.2018.godine.";
-				poruka += "\n" + temp + "\n";
-				thread t([temp](string email) {
+			if (n[i]->GetTeme().getElement2(j).GetOcjena() >= ocjena) {
+				thread t([&]() {
 					m.lock();
-					cout << "Saljem mail -> " << email << endl;
-					cout << temp << endl;
-					this_thread::sleep_for(chrono::seconds(2));
+					s << "Postovani " + n[i]->GetTeme().getElement1(j) + ", uzimajuci u obzir cinjenicu da ste kod mentora " + n[i]->GetImePrezime() + " uspjesno odbranili rad sa ocjenom " + to_string(n[i]->GetTeme().getElement2(j).GetOcjena()) + " cast nam je pozvati vas na dodjelu nagrada za najbolje studente koja ce se odrzatu u na FIT-u 03.07.2019. godine.";
 					m.unlock();
-					}, n->GetTeme().getElement1(i) + "@edu.fit.ba");
-				t.join();
+					});
+				provjera = true;
+				t.join();			
 			}
 		}
 	}
-	return poruka;
+	if (provjera)
+		return s.str();
+	return not_set;
 }
-
 int main() {
 	cout << crt << "UPLOAD RADA OBAVEZNO IZVRSITI U ODGOVARAJUCI FOLDER NA FTP SERVERU" << endl;
 	cout << "U slucaju da je Upload folder prazan pritisnite tipku F5" << crt;
