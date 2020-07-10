@@ -305,6 +305,15 @@ public:
         _uspjeh.push_back(u);
         return true;
     }
+    // zadnja moze i ovako
+    /* Uspjeh* operator[](eRazred r) {
+        for (size_t i = 0; i < _uspjeh.size(); i++) {
+            if (_uspjeh[i].GetERazred() == r) {
+                return &_uspjeh[i];
+            }
+        }
+        return nullptr;
+    } */
     /*
    uspjeh (tokom srednjoskolskog obrazovanja) se dodaje za svaki predmet na nivou razreda.
    tom prilikom onemoguciti:
