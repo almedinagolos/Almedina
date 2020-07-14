@@ -143,13 +143,13 @@ public:
 		ss << "Donori-> ";
 		for (vector<KrvnaGrupa>::const_iterator i = _donori.begin(); i != _donori.end(); i++)
 		{
-			ss << _oznaka << _rhFaktor << ", ";
+			ss << i->_oznaka << i->_rhFaktor << ", ";
 		}
 		ss << endl;
 		ss << "Primaoci -> ";
 		for (vector<KrvnaGrupa>::const_iterator i = _primaoci.begin(); i != _primaoci.end(); i++)
 		{
-			ss << _oznaka << _rhFaktor << ", ";
+			ss << i->_oznaka << i->_rhFaktor << ", ";
 		}
 		ss << crt;
 		return ss.str();
