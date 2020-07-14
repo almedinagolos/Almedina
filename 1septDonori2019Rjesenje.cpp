@@ -261,7 +261,7 @@ public:
 		Donor* donator = dynamic_cast<Donor*>(o);
 		for (size_t i = 0; i < _donacije.GetTrenutno(); i++)
 		{
-			if (_donacije.GetElement1(i) == o) {
+			if (*_donacije.GetElement1(i) == *o) {
 				dynamic_cast<Donor*>(_donacije.GetElement1(i))->SetDatumPosljednjegDoniranja(d);
 				_donacije.SetElement2(i, _donacije.GetElement2(i) + kolicina);
 				return true;
