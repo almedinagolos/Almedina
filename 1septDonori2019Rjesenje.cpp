@@ -252,7 +252,7 @@ public:
 		for (size_t i = 0; i < _zalihe.GetTrenutno(); i++)
 		{
 			if (*_zalihe.GetElement1(i) == o->GetKrvnaGrupa()) {
-				_zalihe.SetElement2(i, _donacije.GetElement2(i) + kolicina);
+				_zalihe.SetElement2(i, _zalihe.GetElement2(i) + kolicina);
 				postoji = true;
 			}
 		}
