@@ -239,7 +239,7 @@ public:
    
 };
 bool ValidirajLozinku(string loz)  {
-        return regex_match(loz, regex("(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*\\W)[a-zA-Z\\d\\W]{7,}"));
+       return regex_search(loz, regex("(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*\\W)(?=.{7,})"));
 }
 class Korisnik {
     char* _imePrezime;
