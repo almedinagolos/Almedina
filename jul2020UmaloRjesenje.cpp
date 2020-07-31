@@ -101,15 +101,14 @@ public:
         }
         _trenutno--;
     }
-   /* T1 &operator[](int j) {
-        for (size_t i = 0; i < _trenutno; i++)
+   T2& operator[](T1 vrijednost)
+    {
+        for (int i = 0; i < _trenutno; i++)
         {
-            if (*_elementi1[i] == j) {
-              
-            }
+            if (*_elementi1[i] == vrijednost)
+                return *_elementi2[i];
         }
-     
-    }*/
+    }
 };
 class Datum {
     int* _dan, * _mjesec, * _godina;
@@ -219,6 +218,13 @@ public:
     Polaganje(Pojas pojas = BIJELI) {
         _pojas = pojas;
     }
+     Polaganje(const Polaganje& p) {
+        _pojas = p._pojas;
+        for (size_t i = 0; i < _polozeneTehnike.size(); i++)
+        {
+            _polozeneTehnike.push_back(new Tehnika(*p._polozeneTehnike[i]));
+        }
+    }
     ~Polaganje() {
         for (size_t i = 0; i < _polozeneTehnike.size(); i++) {
             delete _polozeneTehnike[i];
@@ -236,20 +242,8 @@ public:
     }
    
 };
-//if (ValidirajLozinku("john4Do*e"))
-//cout << "OK" << crt;
-//if (!ValidirajLozinku("john4Doe"))
-//cout << "Specijalni znak?" << crt;
-//if (!ValidirajLozinku("jo*4Da"))
-//cout << "7 znakova?" << crt;
-//if (!ValidirajLozinku("4jo-hnoe"))
-//cout << "Veliko slovo?" << crt;
-//if (ValidirajLozinku("@john2Doe"))
-//cout << "OK" << crt;
-
 bool ValidirajLozinku(string loz)  {
-    string pravilo = "(?=.+\\d)(?=.+[a-z])(?=.+[A-Z])(?=.+[@*&%-])(?=.{7,})";
-    if (regex_search(loz, regex(pravilo))) return true; else return false;
+        return regex_match(loz, regex("(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*\\W)[a-zA-Z\\d\\W]{7,}"));
 }
 class Korisnik {
     char* _imePrezime;
