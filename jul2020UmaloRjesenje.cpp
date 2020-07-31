@@ -79,18 +79,14 @@ public:
             _elementi2[_trenutno++] = new T2(el2);
         }
         else if (lokacija > -1) {
+            for (size_t i = _trenutno; i >= lokacija; i--)
+            {
+                *_elementi1[i] = *_elementi1[i - 1];
+                *_elementi2[i] = *_elementi2[i - 1];
+            }
             _elementi1[lokacija] = new T1(el1);
             _elementi2[lokacija] = new T2(el2);
-            if (lokacija < _trenutno)
-            {
-                _elementi1[_trenutno] = new T1(el1);
-                _elementi2[_trenutno] = new T2(el2);
-            }
-            else if (lokacija > _trenutno)
-            {
-                _elementi1[_trenutno + 1] = new T1(el1);
-                _elementi2[_trenutno + 1] = new T2(el2);
-            }
+            _trenutno++;
         }
     }
     void RemoveAt(int i) {
