@@ -288,10 +288,10 @@ public:
     vector<Polaganje>& GetPolozeniPojasevi() { return _polozeniPojasevi; }
     //void Info() { cout << *this; }
 
-    bool AddTehniku(Pojas p, Tehnika t) {
-        //int brojac = 0;
+     bool AddTehniku(Pojas p, Tehnika t) {
         for (vector<Polaganje>::iterator i = _polozeniPojasevi.begin(); i != _polozeniPojasevi.end(); i++)
         {
+            if (p > i->GetPojas()) return false;
             if (i->GetPojas() == p) {
                 for (size_t j = 0; j < i->GetTehnike().size(); j++)
                 {
@@ -303,15 +303,17 @@ public:
                     }
                     prosjek /= i->GetTehnike()[j]->GetOcjene().getTrenutno();
                     if (prosjek < 3.5) return false;
-               /*     i->DodajTehniku(p, t);
-                    return true;*/
-                }
                
+                }
+                i->GetTehnike().push_back(new Tehnika(t));
+                return true;
             }
-         //   i->DodajTehniku(p, t);
-          //  return true;
+
         }
-        return false;
+        Polaganje pojas(p);
+        pojas.GetTehnike().push_back(new Tehnika(t));
+        _polozeniPojasevi.push_back(pojas);
+        return true;
     }
     /*
            sve tehnike na nivou jednog pojasa (ZUTI, ZELENI ... ) se evidentiraju unutar istog objekta tipa Polaganje,
