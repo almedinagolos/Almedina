@@ -183,7 +183,7 @@ public:
     friend ostream& operator<< (ostream& COUT, const Tehnika& obj) {
         COUT << obj._naziv << " " << *obj._ocjene;
         float prosjek = 0;
-        if (obj._ocjene->getTrenutno() < 0) COUT << "Prosjek -> 0" << endl;
+        if (obj._ocjene->getTrenutno() == 0) COUT << "Prosjek -> 0" << endl;
         else {
             for (size_t i = 0; i < obj._ocjene->getTrenutno(); i++)
             {
