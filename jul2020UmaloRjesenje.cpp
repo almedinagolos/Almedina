@@ -76,7 +76,7 @@ public:
     }
     T1& getElement1(int lokacija)const { return *_elementi1[lokacija]; }
     T2& getElement2(int lokacija)const { return *_elementi2[lokacija]; }
-    int getTrenutno() { return _trenutno; }
+    int getTrenutno()const { return _trenutno; }
     friend ostream& operator<< (ostream& COUT, const Kolekcija& obj) {
         for (size_t i = 0; i < obj._trenutno; i++)
             COUT << obj.getElement1(i) << " " << obj.getElement2(i) << endl;
@@ -116,13 +116,24 @@ public:
                 return *_elementi2[i];
         }
     }
-    bool operator==(const Kolekcija<T1, T2>& k) {
+  /*  bool operator==(const Kolekcija<T1, T2>& k) {
         int brojac = 0;
         for (size_t i = 0; i < k._trenutno; i++)
         {
             if (*_elementi1[i] == *k._elementi1[i] && *_elementi2[i] == *k._elementi2[i]) brojac++;
         }
         if (brojac == k._trenutno) return true; return false;
+    }*/
+    friend bool operator==(const Kolekcija& p, const Kolekcija& d)
+    {
+        int brojac = 0;
+        for (int i = 0; i < p.getTrenutno(); i++) {
+            if (p.getElement1(i) == d.getElement1(i) && p.getElement2(i) == d.getElement2(i))
+            brojac++;
+        }
+        if(brojac == p.getTrenutno())
+        return true;
+        return false;
     }
 };
 class Datum {
@@ -155,8 +166,11 @@ public:
     {
         return brojDani() - d.brojDani();
     }
-    bool operator==(const Datum& d) {
-        return *_dan == *d._dan && *_mjesec == *d._mjesec && *_godina == *d._godina;
+   friend bool operator==(const Datum &p, const Datum& d) {
+       return p.brojDani() == d.brojDani();
+   }
+    bool operator < (const Datum& d) {
+        return *_dan < *d._dan && *_mjesec < *d._mjesec && *_godina < *d._godina;
     }
 };
 
@@ -185,8 +199,8 @@ public:
         delete[] _naziv; _naziv = nullptr;
         delete _ocjene; _ocjene = nullptr;
     }
-    bool operator==(const Tehnika& t) {
-        return strcmp(_naziv, t._naziv) == 0 && _ocjene == t._ocjene;
+    friend bool operator==(const Tehnika& t1, const Tehnika &t2) {
+        return strcmp(t1._naziv, t2._naziv) == 0 && *t1._ocjene == *t2._ocjene;
     }
     float getProsjek()const {
         float prosjek = 0;
@@ -212,7 +226,7 @@ public:
     bool AddOcjena(int ocjena, Datum d) {
         for (size_t i = 0; i < _ocjene->getTrenutno(); i++)
         {
-            if (_ocjene->getTrenutno() != 0 && d - _ocjene->getElement2(i) < 3)return false;
+            if (/*_ocjene->getTrenutno() != 0 &&*/ d - _ocjene->getElement2(i) < 3 || d < _ocjene->getElement2(i))return false;
         }
         _ocjene->AddElement(ocjena, d);
         return true;
