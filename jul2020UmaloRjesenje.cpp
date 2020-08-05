@@ -138,7 +138,7 @@ public:
         return COUT;
     }
     int getDani() const{ return *_dan + *_mjesec * 30 + *_godina * 365; }
-    bool operator - (const Datum& d) {
+    int operator - (const Datum& d) {
         return getDani() - d.getDani();
     }
     bool operator < (const Datum& d) {
