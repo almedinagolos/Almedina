@@ -2,6 +2,8 @@
 #include<vector>
 #include<string>
 #include<regex>
+#include<mutex>
+#include<thread>
 using namespace std;
 /*const char* PORUKA = "\n-------------------------------------------------------------------------------\n"
 "0. PROVJERITE DA LI PREUZETI ZADACI PRIPADAJU VASOJ GRUPI (G1/G2)\n"
@@ -60,18 +62,6 @@ public:
                 _elementi1[i] = nullptr;
                 _elementi2[i] = nullptr;
             }
-        }
-    }
-    Kolekcija& operator=(const Kolekcija& k) {
-        _trenutno = k._trenutno;
-        for (size_t i = 0; i < _trenutno; i++) {
-            delete _elementi1[i]; _elementi1[i] = nullptr;
-            delete _elementi2[i]; _elementi2[i] = nullptr;
-        }
-        for (size_t i = 0; i < k._trenutno; i++)
-        {
-            *_elementi1[i] = *k._elementi1[i];
-            *_elementi2[i] = *k._elementi2[i];
         }
     }
     T1& getElement1(int lokacija)const { return *_elementi1[lokacija]; }
@@ -288,13 +278,13 @@ public:
         _emailAdresa = emailAdresa;
         _lozinka = ValidirajLozinku(lozinka) ? lozinka : NIJE_VALIDNA;
     }
-    ~Korisnik() { delete[] _imePrezime; _imePrezime = nullptr; }
+   virtual ~Korisnik() { delete[] _imePrezime; _imePrezime = nullptr; }
     string GetEmail() { return _emailAdresa; }
     string GetLozinka() { return _lozinka; }
     char* GetImePrezime() { return _imePrezime; }
     virtual void Info() = 0;
 };
-
+mutex m;
 class KaratePolaznik:public Korisnik {
     vector<Polaganje> _polozeniPojasevi;
 public:
@@ -308,6 +298,21 @@ public:
             COUT << obj._polozeniPojasevi[i];
         return COUT;
     }
+    float getProsjek() {
+        float prosjek = 0;
+        for (size_t i = 0; i < _polozeniPojasevi.size(); i++)
+        {
+            prosjek += _polozeniPojasevi[i].getProsjek();
+        }
+        prosjek /= _polozeniPojasevi.size();
+        if (_polozeniPojasevi.size() == 0) return 0;
+        return prosjek;
+    }
+    void Ispis(Tehnika t, Pojas p, Polaganje polaganje) {
+        m.lock();
+        cout << " FROM:info@karate.ba\nTO: " << GetEmail() << "\nPostovani " << GetImePrezime() << " evidentirana vam je tehnika " << t.GetNaziv() << " za " << PojasString[p] << " Dosadasnji uspjeh na pojasu " << PojasString[p] << " iznosi" << polaganje.getProsjek() << " a ukupni prosjek na svim pojasevima iznosi " << getProsjek() << "\nPozdrav.\nKARATE Team." << endl;
+        m.unlock();
+    }
     vector<Polaganje>& GetPolozeniPojasevi() { return _polozeniPojasevi; }
     void Info() { cout << *this; }
     bool AddTehniku(Pojas p, Tehnika t) {
@@ -320,12 +325,16 @@ public:
                     if (*i->GetTehnike()[j] == t) return false;
                 }
                 i->GetTehnike().push_back(new Tehnika(t));
+                thread t(&KaratePolaznik::Ispis, this, t, p, i->GetPojas());
+                t.join();
                 return true;
             }
         }
         Polaganje pojas(p);
         pojas.GetTehnike().push_back(new Tehnika (t));
         _polozeniPojasevi.push_back(pojas);
+        thread t1(&KaratePolaznik::Ispis, this, t, p, pojas);
+        t1.join();
         return true;
     }
     /*
@@ -335,7 +344,17 @@ public:
    - dodavanje tehnika za visi pojas ako prethodni pojas nema evidentirane najmanje 3 tehnike ili nema prosjecnu ocjenu svih tehnika vecu od 3.5
    (onemoguciti dodavanje tehnike za NARANDZASTI ako ne postoji najmanje 3 tehnike za ZUTI pojas ili njihov prosjek nije veci od 3.5)
    funkcija vraca true ili false u zavisnosti od (ne)uspjesnost izvrsenja
-   */
+   */ 
+   /*nakon evidentiranja tehnike na bilo kojem pojasu kandidatu se salje email sa porukom:
+    FROM:info@karate.ba
+    TO: emailKorisnika
+    Postovani ime i prezime, evidentirana vam je thenika X za Y pojas. Dosadasnji uspjeh (prosjek ocjena)
+    na pojasu Y iznosi F, a ukupni uspjeh (prosjek ocjena) na svim pojasevima iznosi Z.
+    Pozdrav.
+    KARATE Team.
+    slanje email poruka implemenitrati koristeci zasebne thread-ove.
+    */
+
 };
 
 
@@ -488,16 +507,6 @@ void main() {
         //ispisuje sve dostupne podatke o karate polazniku
         cout << *jasminPolaznik << crt;
     }
-
-    /*nakon evidentiranja tehnike na bilo kojem pojasu kandidatu se salje email sa porukom:
-    FROM:info@karate.ba
-    TO: emailKorisnika
-    Postovani ime i prezime, evidentirana vam je thenika X za Y pojas. Dosadasnji uspjeh (prosjek ocjena)
-    na pojasu Y iznosi F, a ukupni uspjeh (prosjek ocjena) na svim pojasevima iznosi Z.
-    Pozdrav.
-    KARATE Team.
-    slanje email poruka implemenitrati koristeci zasebne thread-ove.
-    */
 
     //osigurati da se u narednim linijama poziva i destruktor klase KaratePolaznik
     delete jasmin;
