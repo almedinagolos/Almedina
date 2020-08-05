@@ -116,14 +116,6 @@ public:
                 return *_elementi2[i];
         }
     }
-  /*  bool operator==(const Kolekcija<T1, T2>& k) {
-        int brojac = 0;
-        for (size_t i = 0; i < k._trenutno; i++)
-        {
-            if (*_elementi1[i] == *k._elementi1[i] && *_elementi2[i] == *k._elementi2[i]) brojac++;
-        }
-        if (brojac == k._trenutno) return true; return false;
-    }*/
     friend bool operator==(const Kolekcija& p, const Kolekcija& d)
     {
         int brojac = 0;
@@ -231,12 +223,6 @@ public:
         _ocjene->AddElement(ocjena, d);
         return true;
     }
-    //bool AddOcjena(int ocjena, Datum datum)
-    //{
-    //    if (_ocjene->getTrenutno() != 0 && datum - _ocjene->getElement2(_ocjene->getTrenutno() - 1) < 3) return false; // dovoljno je provjeriti da li je novi datum 3 dana stariji od zadnjeg dodanog datuma
-    //    _ocjene->AddElement(ocjena, datum);
-    //}
-
 };
 
 class Polaganje {
