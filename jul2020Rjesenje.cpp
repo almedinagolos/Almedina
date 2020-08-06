@@ -80,14 +80,16 @@ public:
             _elementi1[_trenutno] = new T1(el1);
             _elementi2[_trenutno++] = new T2(el2);
         }
-        else  {          
-            for (size_t i = _trenutno; i >= lokacija ; i--)
+        eelse {
+            _elementi1[_trenutno] = new T1;
+            _elementi2[_trenutno] = new T2;
+            for (size_t i = _trenutno; i >= lokacija; i--)
             {
                 *_elementi1[i] = *_elementi1[i - 1];
                 *_elementi2[i] = *_elementi2[i - 1];
             }
-            _elementi1[lokacija] = new T1(el1);
-            _elementi2[lokacija] = new T2(el2);
+            *_elementi1[lokacija] = el1;
+            *_elementi2[lokacija] = el2;
             _trenutno++;
         }
     }
