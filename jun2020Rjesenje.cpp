@@ -1,10 +1,10 @@
 #include<iostream>
-#include<vector>
 #include<string>
-#include<exception>
+#include<thread>
 #include<regex>
+#include<mutex>
+#include<vector>
 using namespace std;
-
 /*const char* PORUKA = "\n-------------------------------------------------------------------------------\n"
 "1. SVE KLASE TREBAJU POSJEDOVATI ADEKVATAN DESTRUKTOR\n"
 "2. NAMJERNO IZOSTAVLJANJE KOMPLETNIH I/ILI POJEDINIH DIJELOVA DESTRUKTORA CE BITI OZNACENO KAO RE\n"
@@ -17,9 +17,10 @@ using namespace std;
 "7. RJESENJA ZADATKA POSTAVITE NA FTP SERVER U ODGOVARAJUCI FOLDER!\n"
 "-------------------------------------------------------------------------------\n";
 */
+
 const char* crt = "\n-------------------------------------------\n";
 enum eRazred { PRVI = 1, DRUGI, TRECI, CETVRTI };
-
+const char* eRazredString[] = { "PRVI", "DRUGI", "TRECI", "CETVRTI" };
 char* GetNizKaraktera(const char* sadrzaj, bool dealociraj = false) {
     if (sadrzaj == nullptr)return nullptr;
     int vel = strlen(sadrzaj) + 1;
@@ -54,7 +55,7 @@ public:
         }
     }
     Kolekcija& operator=(const Kolekcija& k) {
-        if (this != &k) {
+        if(this != &k){
             _trenutno = k._trenutno;
             _omoguciDupliranje = k._omoguciDupliranje;
             delete[] _elementi1;
@@ -67,7 +68,7 @@ public:
                 _elementi2[i] = k._elementi2[i];
             }
         }
-     return *this;
+        return *this;
     }
     ~Kolekcija() {
         delete[]_elementi1; _elementi1 = nullptr;
@@ -85,9 +86,10 @@ public:
         if (!_omoguciDupliranje) {
             for (size_t i = 0; i < _trenutno; i++)
             {
-                if(_elementi1[i] == el1 && _elementi2[i] == el2) {
-                throw exception("Nije dozvoljeno duliranje elemenata."); return;
-            }
+                if (_elementi1[i] == el1 && _elementi2[i] == el2) {
+                    throw exception("Nije dozvoljeno dupliranje elemenata."); 
+                    return;
+                }
             }
         }
         T1* temp1 = new T1[_trenutno + 1];
@@ -105,9 +107,9 @@ public:
         _elementi2 = temp2; temp2 = nullptr;
     }
     Kolekcija<T1, T2> operator()(int i, int j) {
-        if (i < 0 || j < 0) throw exception("Opseg nije validanNNN."); 
-        if (i > j) throw exception("Opseg nije validan.");
-        if(i>=_trenutno || j>= _trenutno) throw exception("Opseg nije validan.");
+        if (i < 0 || j < 0) throw exception("Nepostojeca lokacijaA.");
+        if (i > j) throw exception("Nepostojeca lokacijaAA.");
+        if (i >= _trenutno || j > _trenutno) throw exception("Nepostojeca lokacija.");
         Kolekcija<T1, T2> temp;
         for (size_t k = i; k <= j; k++)
         {
@@ -117,18 +119,13 @@ public:
     }
     bool operator==(const Kolekcija<T1, T2>& k) {
         int brojac = 0;
-        for (size_t i = 0; i < _trenutno; i++)
+        for (size_t i = 0; i < k._trenutno; i++)
         {
-            if (_elementi1[i] == k._elementi1[i] && _elementi2[i] == k._elementi2[i])
-                brojac++;
+            if (_elementi1[i] == k._elementi1[i] && _elementi2[i] == k._elementi2[i])brojac++;
         }
-        if (brojac == _trenutno)return true;
-        else
-            return false;
+        if (brojac == _trenutno) return true; return false;
     }
 };
-
-
 class Datum {
     int* _dan, * _mjesec, * _godina;
 public:
@@ -161,13 +158,15 @@ public:
     }
     bool operator==(const Datum& d) {
         return *_dan == *d._dan && *_mjesec == *d._mjesec && *_godina == *d._godina;
+    } 
+    bool operator<=(const Datum& d) {
+        return *_dan <= *d._dan && *_mjesec <= *d._mjesec && *_godina <= *d._godina;
+    } 
+    bool operator>=(const Datum& d) {
+        return *_dan >= *d._dan && *_mjesec >= *d._mjesec && *_godina >= *d._godina;
     }
-    bool operator<(const Datum& d) {
-        return *_dan < *d._dan && *_mjesec < *d._mjesec && *_godina < *d._godina;
-    }
-    bool operator>(const Datum& d) {
-        return *_dan > *d._dan && *_mjesec > *d._mjesec && *_godina > *d._godina;
-    }
+    int getDani() const{ return *_dan + *_mjesec * 30 + *_godina * 365; }
+    
 };
 
 class Predmet {
@@ -189,10 +188,21 @@ public:
             delete[] _naziv;
             _naziv = GetNizKaraktera(p._naziv);
             _ocjene = p._ocjene;
-        } return *this;
+        }
+        return *this;
     }
     ~Predmet() {
         delete[] _naziv; _naziv = nullptr;
+    }
+    float getProsjekPredmet()const {
+        float prosjek = 0;
+        for (size_t i = 0; i < _ocjene.getTrenutno(); i++)
+        {
+            prosjek += _ocjene.getElement1(i);
+        }
+        prosjek /= _ocjene.getTrenutno();
+        if (_ocjene.getTrenutno() == 0) return 0;
+        return prosjek;
     }
     void AddOcjena(int ocjena, Datum datum) {
         _ocjene.AddElement(ocjena, datum);
@@ -200,21 +210,16 @@ public:
     char* GetNaziv() { return _naziv; }
     Kolekcija<int, Datum>& GetOcjene() { return _ocjene; }
     friend ostream& operator<< (ostream& COUT, const Predmet& obj) {
-        COUT << obj._naziv << " " << obj._ocjene << endl;
-        float prosjek = 0;
-        if (obj._ocjene.getTrenutno() == 0)
-            COUT << "Prosjek je nula" << endl;
+        COUT << "Naziv -> " << obj._naziv << endl;
         for (size_t i = 0; i < obj._ocjene.getTrenutno(); i++)
         {
-            prosjek += obj._ocjene.getElement1(i);
+            COUT << "Ocjena -> " << obj._ocjene.getElement1(i) << " Datum -> " << obj._ocjene.getElement2(i) << endl;
         }
-        prosjek /= obj._ocjene.getTrenutno();
-
-        COUT << "Prosjek je: " << prosjek << endl;
+        COUT << "Prosjek -> " << obj.getProsjekPredmet() << endl;
         return COUT;
     }
     bool operator==(const Predmet& p) {
-        if ((strcmp(_naziv, p._naziv) == 0) && _ocjene == p._ocjene) return true; else return false;
+        if (strcmp(_naziv, p._naziv) == 0 && _ocjene == p._ocjene) return true; return false;
     }
 };
 class Uspjeh {
@@ -224,26 +229,31 @@ class Uspjeh {
 public:
     Uspjeh(eRazred razred = PRVI) {
         _razred = razred;
-        _polozeniPredmeti = new  Kolekcija<Predmet, string>;
+        _polozeniPredmeti = new Kolekcija<Predmet, string>();
     }
-    Uspjeh(const Uspjeh& u):Uspjeh(u._razred) {
+    Uspjeh(const Uspjeh& u):_razred(u._razred) {
         _polozeniPredmeti = new Kolekcija<Predmet, string>(*u._polozeniPredmeti);
     }
     ~Uspjeh() { delete _polozeniPredmeti; _polozeniPredmeti = nullptr; }
-    void DodajPredmet(Predmet p, string s) {
-        _polozeniPredmeti->AddElement(p, s);
-    }
+
     Kolekcija<Predmet, string>* GetPredmeti() { return _polozeniPredmeti; }
     eRazred GetERazred() { return _razred; }
     friend ostream& operator<< (ostream& COUT, const Uspjeh& obj) {
-        COUT << obj._razred << " " << *obj._polozeniPredmeti << endl;
+        COUT <<"Razred -> " << obj._razred << " " << *obj._polozeniPredmeti << endl;
         return COUT;
     }
 };
 bool ValidirajEmail(string mail) {
-    if (regex_match(mail, regex("([a-zA-Z//.]{1,})[@](edu.fit|fit)[.](ba|com|org)")))return true; return false;
+    return regex_match(mail, regex("([a-z//.]{1,})([@])(edu.fit|fit)(.ba|.org|.com)"));
 }
-const char* not_set = "not_set@edu.fit.ba";
+/*
+  email adresa mora biti u formatu text.text (sa ili bez tacke),
+  dok domena moze biti fit.ba ili edu.fit.ba
+  nakon institucije (fit ili edu.fit), osim drzavne (.ba), dozvoljene su domene .com i .org.
+  za provjeru validnosti email adrese koristiti globalnu funkciju ValidirajEmail, a unutar nje regex metode.
+  validacija email adrese ce se vrsiti unutar konstruktora klase Kandidat, a u slucaju da nije validna
+  postaviti je na defaultnu adresu: notSet@edu.fit.ba
+  */
 class Kandidat {
     char* _imePrezime;
     string _emailAdresa;
@@ -252,11 +262,7 @@ class Kandidat {
 public:
     Kandidat(const char* imePrezime, string emailAdresa, string brojTelefona) {
         _imePrezime = GetNizKaraktera(imePrezime);
-        if (ValidirajEmail(emailAdresa)) _emailAdresa = emailAdresa;
-        else {
-            _emailAdresa = not_set;
-        }
-        
+        if (ValidirajEmail(emailAdresa)) _emailAdresa = emailAdresa; else _emailAdresa = "NotSet@edu.fit.ba";
         _brojTelefona = brojTelefona;
     }
     Kandidat(const Kandidat& k) {
@@ -278,26 +284,18 @@ public:
     string GetEmail() { return _emailAdresa; }
     string GetBrojTelefona() { return _brojTelefona; }
     char* GetImePrezime() { return _imePrezime; }
-    friend ostream& operator<< (ostream& COUT, const Kandidat& obj) {
-        COUT << obj._imePrezime << " " << obj._emailAdresa << " " << obj._brojTelefona << endl;
-        return COUT;
-    }
     bool AddPredmet(eRazred r, Predmet p, string napomena) {
         for (vector<Uspjeh>::iterator i = _uspjeh.begin(); i != _uspjeh.end(); i++)
         {
             if (i->GetERazred() == r) {
                 for (size_t j = 0; j < i->GetPredmeti()->getTrenutno(); j++)
                 {
+                    if (i->GetPredmeti()->getTrenutno() > 5) return false;
                     if (i->GetPredmeti()->getElement1(j) == p) return false;
-                    if (i->GetPredmeti()->getTrenutno() > 5)return false;
-                    float prosjek = 0;
-                    for (size_t k = 0; k < i->GetPredmeti()->getElement1(j).GetOcjene().getTrenutno(); k++)
-                    {
-                        prosjek += i->GetPredmeti()->getElement1(j).GetOcjene().getElement1(k);
-                    }
-                    prosjek /= i->GetPredmeti()->getElement1(j).GetOcjene().getTrenutno();
-                    if (prosjek < 2.5) return false;
+                    if (i->GetPredmeti()->getElement1(j).getProsjekPredmet() < 2.5) return false;
                 }
+               /* i->GetPredmeti()->AddElement(p, napomena);
+                return true;*/
             }
         }
         Uspjeh u(r);
@@ -305,52 +303,48 @@ public:
         _uspjeh.push_back(u);
         return true;
     }
-    // zadnja moze i ovako
-    /* Uspjeh* operator[](eRazred r) {
-        for (size_t i = 0; i < _uspjeh.size(); i++) {
-            if (_uspjeh[i].GetERazred() == r) {
-                return &_uspjeh[i];
-            }
-        }
-        return nullptr;
-    } */
     /*
-   uspjeh (tokom srednjoskolskog obrazovanja) se dodaje za svaki predmet na nivou razreda.
-   tom prilikom onemoguciti:
-   - dodavanje istih (moraju biti identicne vrijednosti svih clanova) predmeta na nivou jednog razreda,
-   - dodavanje predmeta kod kojih je prosjecna ocjena manja od 2.5
-   - dodavanje vise od 5 predmeta na nivou jednog razreda
-   razredi (predmeti ili uspjeh) ne moraju biti dodavani sortiranim redoslijedom (npr. prvo se moze dodati uspjeh za II razred, pa onda za I razred i sl.).
-   Funkcija vraca true ili false u zavisnosti od (ne)uspjesnost izvrsenja
-   */
-   //vraca kolekciju predmeta koji sadrze najmanje jednu ocjenu evidentiranu u periodu izmedju proslijedjenih datuma
-   //float se odnosi na prosjecan broj dana izmedju ostvarenih ocjena na predmetu
+    uspjeh (tokom srednjoskolskog obrazovanja) se dodaje za svaki predmet na nivou razreda.
+    tom prilikom onemoguciti:
+    - dodavanje istih (moraju biti identicne vrijednosti svih clanova) predmeta na nivou jednog razreda,
+    - dodavanje predmeta kod kojih je prosjecna ocjena manja od 2.5
+    - dodavanje vise od 5 predmeta na nivou jednog razreda
+    razredi (predmeti ili uspjeh) ne moraju biti dodavani sortiranim redoslijedom (npr. prvo se moze dodati uspjeh za II razred, pa onda za I razred i sl.).
+    Funkcija vraca true ili false u zavisnosti od (ne)uspjesnost izvrsenja
+    */
     Kolekcija<Predmet, float> operator()(Datum d1, Datum d2) {
         Kolekcija<Predmet, float> temp;
+        float prosjek = 0;
         for (vector<Uspjeh>::iterator i = _uspjeh.begin(); i != _uspjeh.end(); i++)
         {
             for (size_t j = 0; j < i->GetPredmeti()->getTrenutno(); j++)
             {
                 for (size_t k = 0; k < i->GetPredmeti()->getElement1(j).GetOcjene().getTrenutno(); k++)
                 {
-                    if ((i->GetPredmeti()->getElement1(j).GetOcjene().getElement2(k) > d1 || i->GetPredmeti()->getElement1(j).GetOcjene().getElement2(k) < d2) && i->GetPredmeti()->getElement1(j).GetOcjene().getTrenutno() > 0)
-                        temp.AddElement(i->GetPredmeti()->getElement1(j), 5);
+                    if (i->GetPredmeti()->getElement1(j).GetOcjene().getElement2(k) >= d1&& i->GetPredmeti()->getElement1(j).GetOcjene().getElement2(k) <= d2)
+                    {
+                        prosjek = d1.getDani() + d2.getDani();
+                        prosjek /= 2;
+                        temp.AddElement(i->GetPredmeti()->getElement1(j), prosjek);
+                    }
                 }
             }
         }
         return temp;
     }
+    //vraca kolekciju predmeta koji sadrze najmanje jednu ocjenu evidentiranu u periodu izmedju proslijedjenih datuma
+    //float se odnosi na prosjecan broj dana izmedju ostvarenih ocjena na predmetu
     Uspjeh* operator[](eRazred r){
-        Uspjeh* temp = new Uspjeh(r);
-        for (vector<Uspjeh>::iterator i = _uspjeh.begin(); i != _uspjeh.end(); i++) {
+        Uspjeh *temp = new Uspjeh(r);
+        for (vector<Uspjeh>::iterator i = _uspjeh.begin(); i != _uspjeh.end(); i++)
+        {
             if (i->GetERazred() == r) {
                 for (size_t j = 0; j < i->GetPredmeti()->getTrenutno(); j++)
                 {
-                    temp->DodajPredmet(i->GetPredmeti()->getElement1(j), i->GetPredmeti()->getElement2(j));
+                    temp->GetPredmeti()->AddElement(i->GetPredmeti()->getElement1(j), i->GetPredmeti()->getElement2(j));
                 }
-           }
+            }
         }
-
         return temp;
     }
 };
@@ -365,13 +359,13 @@ const char* GetOdgovorNaDrugoPitanje() {
 
 void main() {
 
-    //cout << PORUKA;
+   /* cout << PORUKA;
     cin.get();
 
     cout << GetOdgovorNaPrvoPitanje() << endl;
     cin.get();
     cout << GetOdgovorNaDrugoPitanje() << endl;
-    cin.get();
+    cin.get();*/
 
     Datum temp,
         datum19062019(19, 6, 2019),
@@ -399,7 +393,7 @@ void main() {
     cout << kolekcija2 << crt;
     try {
         //primjeri u kojima opseg nije validan, te bi funkcija trebala baciti izuzetak
-      //  Kolekcija<int, int> temp1 = kolekcija1(1, 14);//imamo 10 elemenata
+        Kolekcija<int, int> temp1 = kolekcija1(1, 14);//imamo 10 elemenata
         Kolekcija<int, int> temp2 = kolekcija1(-1, 8);//lokacija -1 ne postoji
     }
     catch (exception & err) {
@@ -430,32 +424,21 @@ void main() {
     if (ValidirajEmail("texttext@edu.fit.org"))
         cout << "Email validan" << crt;
 
-    /*
-    email adresa mora biti u formatu text.text (sa ili bez tacke),
-    dok domena moze biti fit.ba ili edu.fit.ba
-    nakon institucije (fit ili edu.fit), osim drzavne (.ba), dozvoljene su domene .com i .org.
-
-    za provjeru validnosti email adrese koristiti globalnu funkciju ValidirajEmail, a unutar nje regex metode.
-    validacija email adrese ce se vrsiti unutar konstruktora klase Kandidat, a u slucaju da nije validna
-    postaviti je na defaultnu adresu: notSet@edu.fit.ba
-    */
-
-   Kandidat jasmin("Jasmin Azemovic", "jasmin@fit.ba", "033 281 172");
+    Kandidat jasmin("Jasmin Azemovic", "jasmin@fit.ba", "033 281 172");
     Kandidat adel("Adel Handzic", "adel@edu.fit.ba", "033 281 170");
     Kandidat emailNotValid("Ime Prezime", "korisnik@klix.ba", "033 281 170");
 
-   
     if (jasmin.AddPredmet(DRUGI, Fizika, "Napomena 1"))
-        cout << "Predmet uspjesno dodan!" << crt;
+        cout << "Predmet uspjesno dodan1!" << crt;
     if (jasmin.AddPredmet(DRUGI, Hemija, "Napomena 2"))
-        cout << "Predmet uspjesno dodan!" << crt;
+        cout << "Predmet uspjesno dodan2!" << crt;
     if (jasmin.AddPredmet(PRVI, Engleski, "Napomena 3"))
-        cout << "Predmet uspjesno dodan!" << crt;
+        cout << "Predmet uspjesno dodan3!" << crt;
     if (jasmin.AddPredmet(PRVI, Matematika, "Napomena 4"))
-        cout << "Predmet uspjesno dodan!" << crt;
+        cout << "Predmet uspjesno dodan4!" << crt;
     //ne treba dodati Matematiku jer je vec dodana u prvom razredu
     if (jasmin.AddPredmet(PRVI, Matematika, "Napomena 5"))
-        cout << "Predmet uspjesno dodan!" << crt;
+        cout << "Predmet uspjesno dodan5!" << crt;
 
     /*nakon evidentiranja uspjeha na bilo kojem predmetu kandidatu se salje email sa porukom:
     FROM:info@fit.ba
@@ -469,13 +452,12 @@ void main() {
     */
     cout << jasmin << crt;
 
-    
     Kolekcija<Predmet, float> jasminUspjeh = jasmin(Datum(18, 06, 2019), Datum(21, 06, 2019));
-    cout << jasminUspjeh << crt;
+    cout <<"FUNKCIJA()1\n" << jasminUspjeh << crt;
 
     Uspjeh* uspjeh_Irazred = jasmin[PRVI];//vraca uspjeh kandidata ostvaren u prvom razredu
     if (uspjeh_Irazred != nullptr)
-        cout << *uspjeh_Irazred << crt;
+        cout <<"FUNKCIJA[]2\n" << *uspjeh_Irazred << crt;
 
     cin.get();
     system("pause>0");
