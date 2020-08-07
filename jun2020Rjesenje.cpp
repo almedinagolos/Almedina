@@ -165,7 +165,7 @@ public:
     bool operator>=(const Datum& d) {
         return *_dan >= *d._dan && *_mjesec >= *d._mjesec && *_godina >= *d._godina;
     }
-    int getDani() const{ return *_dan + *_mjesec * 30 + *_godina * 365; }
+    int getDani() const { return *_dan + *_mjesec * 30 + *_godina * 365; }
     
 };
 
@@ -242,6 +242,15 @@ public:
         COUT <<"Razred -> " << obj._razred << " " << *obj._polozeniPredmeti << endl;
         return COUT;
     }
+    float getProsjekNaNivouRazreda()const{
+        float prosjek = 0;
+        for (size_t i = 0; i < _polozeniPredmeti->getTrenutno(); i++)
+        {
+            prosjek += _polozeniPredmeti->getElement1(i).getProsjekPredmet();
+        }
+        
+        return prosjek;
+    }
 };
 bool ValidirajEmail(string mail) {
     return regex_match(mail, regex("([a-z//.]{1,})([@])(edu.fit|fit)(.ba|.org|.com)"));
@@ -254,6 +263,7 @@ bool ValidirajEmail(string mail) {
   validacija email adrese ce se vrsiti unutar konstruktora klase Kandidat, a u slucaju da nije validna
   postaviti je na defaultnu adresu: notSet@edu.fit.ba
   */
+mutex m;
 class Kandidat {
     char* _imePrezime;
     string _emailAdresa;
@@ -274,6 +284,22 @@ public:
     ~Kandidat() {
         delete[] _imePrezime; _imePrezime = nullptr;
     }
+    float getProsjekSkolovanje() {
+        float prosjek = 0;
+        for (size_t i = 0; i < _uspjeh.size(); i++)
+        {
+            prosjek += _uspjeh[i].getProsjekNaNivouRazreda();
+        }
+        prosjek /= _uspjeh.size();
+        if (_uspjeh.size() == 0) return 0;
+        return prosjek;
+    }
+    void SaljemMail(eRazred r, Predmet p, Uspjeh us) {
+        m.lock();
+        cout << "FROM:info@fit.ba\nTO: " << GetEmail() << "\nPostovani " << GetImePrezime() <<" evidentirali ste uspjeh za " << r << " razred.\nDosadasnji uspjeh (prosjek) na nivou " << r << " razreda iznosi " << us.getProsjekNaNivouRazreda() << ", a ukupni uspjeh u toku skolovanja iznosi " << getProsjekSkolovanje() << "\nPozdrav.\nFIT Team.\n" << endl;
+        m.unlock();
+    }
+   
     friend ostream& operator<< (ostream& COUT, Kandidat& obj) {
         COUT << obj._imePrezime << " " << obj._emailAdresa << " " << obj._brojTelefona << endl;
         for (size_t i = 0; i < obj._uspjeh.size(); i++)
@@ -294,13 +320,17 @@ public:
                     if (i->GetPredmeti()->getElement1(j) == p) return false;
                     if (i->GetPredmeti()->getElement1(j).getProsjekPredmet() < 2.5) return false;
                 }
-               /* i->GetPredmeti()->AddElement(p, napomena);
-                return true;*/
+                i->GetPredmeti()->AddElement(p, napomena);
+                thread mail(&Kandidat::SaljemMail, this, r, p, i->GetERazred());
+                mail.join();
+                return true;
             }
         }
         Uspjeh u(r);
         u.GetPredmeti()->AddElement(p, napomena);
         _uspjeh.push_back(u);
+        thread mail2(&Kandidat::SaljemMail, this, r, p, u.GetERazred());
+        mail2.join();
         return true;
     }
     /*
@@ -312,6 +342,16 @@ public:
     razredi (predmeti ili uspjeh) ne moraju biti dodavani sortiranim redoslijedom (npr. prvo se moze dodati uspjeh za II razred, pa onda za I razred i sl.).
     Funkcija vraca true ili false u zavisnosti od (ne)uspjesnost izvrsenja
     */
+    /*nakon evidentiranja uspjeha na bilo kojem predmetu kandidatu se salje email sa porukom:
+    FROM:info@fit.ba
+    TO: emailKorisnika
+    Postovani ime i prezime, evidentirali ste uspjeh za X razred. Dosadasnji uspjeh (prosjek)
+    na nivou X razreda iznosi Y, a ukupni uspjeh u toku skolovanja iznosi Z.
+    Pozdrav.
+    FIT Team.
+    ukoliko je prosjek na nivou tog razreda veci od 4.5 kandidatu se salje SMS sa porukom: "Svaka cast za uspjeh 4.X u X razredu".
+    slanje poruka i emailova implemenitrati koristeci zasebne thread-ove.
+    */
     Kolekcija<Predmet, float> operator()(Datum d1, Datum d2) {
         Kolekcija<Predmet, float> temp;
         float prosjek = 0;
@@ -321,10 +361,10 @@ public:
             {
                 for (size_t k = 0; k < i->GetPredmeti()->getElement1(j).GetOcjene().getTrenutno(); k++)
                 {
-                    if (i->GetPredmeti()->getElement1(j).GetOcjene().getElement2(k) >= d1&& i->GetPredmeti()->getElement1(j).GetOcjene().getElement2(k) <= d2)
+                    if (i->GetPredmeti()->getElement1(j).GetOcjene().getElement2(k) >= d1 && i->GetPredmeti()->getElement1(j).GetOcjene().getElement2(k) <= d2)
                     {
-                        prosjek = d1.getDani() + d2.getDani();
-                        prosjek /= 2;
+                       // prosjek = (d2.getDani() - d1.getDani());
+                        //prosjek /= 2;
                         temp.AddElement(i->GetPredmeti()->getElement1(j), prosjek);
                     }
                 }
@@ -440,24 +480,15 @@ void main() {
     if (jasmin.AddPredmet(PRVI, Matematika, "Napomena 5"))
         cout << "Predmet uspjesno dodan5!" << crt;
 
-    /*nakon evidentiranja uspjeha na bilo kojem predmetu kandidatu se salje email sa porukom:
-    FROM:info@fit.ba
-    TO: emailKorisnika
-    Postovani ime i prezime, evidentirali ste uspjeh za X razred. Dosadasnji uspjeh (prosjek)
-    na nivou X razreda iznosi Y, a ukupni uspjeh u toku skolovanja iznosi Z.
-    Pozdrav.
-    FIT Team.
-    ukoliko je prosjek na nivou tog razreda veci od 4.5 kandidatu se salje SMS sa porukom: "Svaka cast za uspjeh 4.X u X razredu".
-    slanje poruka i emailova implemenitrati koristeci zasebne thread-ove.
-    */
+    
     cout << jasmin << crt;
 
     Kolekcija<Predmet, float> jasminUspjeh = jasmin(Datum(18, 06, 2019), Datum(21, 06, 2019));
-    cout <<"FUNKCIJA()1\n" << jasminUspjeh << crt;
+    cout <<"FUNKCIJA1()\n" << jasminUspjeh << crt;
 
     Uspjeh* uspjeh_Irazred = jasmin[PRVI];//vraca uspjeh kandidata ostvaren u prvom razredu
     if (uspjeh_Irazred != nullptr)
-        cout <<"FUNKCIJA[]2\n" << *uspjeh_Irazred << crt;
+        cout <<"FUNKCIJA2[]\n" << *uspjeh_Irazred << crt;
 
     cin.get();
     system("pause>0");
