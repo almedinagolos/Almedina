@@ -242,13 +242,16 @@ public:
         COUT <<"Razred -> " << obj._razred << " " << *obj._polozeniPredmeti << endl;
         return COUT;
     }
-    float getProsjekNaNivouRazreda()const{
+    float getProsjekNaNivouRazreda()const {
         float prosjek = 0;
+        float prosjekTrenutno = 0;
         for (size_t i = 0; i < _polozeniPredmeti->getTrenutno(); i++)
         {
-            prosjek += _polozeniPredmeti->getElement1(i).getProsjekPredmet();
+            prosjekTrenutno += _polozeniPredmeti->getElement1(i).getProsjekPredmet();
         }
-        
+        prosjekTrenutno /= _polozeniPredmeti->getTrenutno();
+        if (prosjek < prosjekTrenutno) prosjek = prosjekTrenutno;
+        if (_polozeniPredmeti->getTrenutno() == 0) return 0;
         return prosjek;
     }
 };
