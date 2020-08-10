@@ -242,7 +242,8 @@ public:
         COUT <<"Razred -> " << obj._razred << " " << *obj._polozeniPredmeti << endl;
         return COUT;
     }
-     float prosjek = 0;
+   float getProsjekNaNivouRazreda()const {
+        float prosjek = 0;
         for (size_t i = 0; i < _polozeniPredmeti->getTrenutno(); i++)
         {
             prosjek += _polozeniPredmeti->getElement1(i).getProsjekPredmet();
@@ -250,6 +251,7 @@ public:
         prosjek /= _polozeniPredmeti->getTrenutno();
         if (_polozeniPredmeti->getTrenutno() == 0) return 0;
         return prosjek;
+    }
 };
 bool ValidirajEmail(string mail) {
     return regex_match(mail, regex("([a-z//.]{1,})([@])(edu.fit|fit)(.ba|.org|.com)"));
