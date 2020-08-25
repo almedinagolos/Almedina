@@ -346,6 +346,41 @@ public:
 		}
 		return pair<Polaznik*, float>(p, prosjek);
 	}
+		bool SpasiUFajl(string fajl, bool dodaj = false) {
+		if (dodaj) {
+			ofstream upis(fajl, ios::app);
+			upis << "Skola: " << _naziv << endl << "Ucenici -> " << endl;
+			for (vector<Ucenik>::iterator i = _ucenici.begin(); i != _ucenici.end(); i++)
+			{
+				cout << *i << endl;
+			}
+			upis.close();
+			ifstream ispis(fajl);
+			char znak;
+			while (ispis.get(znak))
+				cout << znak;
+			cout << endl;
+			ispis.close();
+			return true;
+		}
+		else {
+			ofstream upis(fajl, ios::out);
+			upis << "Skola: " << _naziv << endl << "Ucenici -> " << endl;
+			for (vector<Ucenik>::iterator i = _ucenici.begin(); i != _ucenici.end(); i++)
+			{
+				cout << *i << endl;
+			}
+			upis.close();
+			ifstream ispis("Gimnazija.txt");
+			char znak;
+			while (ispis.get(znak))
+				cout << znak;
+			cout << endl;
+			ispis.close();
+			return true;
+		}
+	}
+
 };
 
 int main() {
@@ -420,10 +455,10 @@ int main() {
 	/*U fajl (npr. Gimnazija.txt) upisati podatke (podatke upisati kao obicni tekst) o skoli i svim ucenicima.
 	Nakon upisa, potrebno je ispisati sadrzaj fajla. Parametar tipa bool oznacava da li ce ranije dodani sadrzaj fajla prethodno biti pobrisan*/
 
-	//	if (gimnazijaMostar.SpasiUFajl("Gimnazija.txt"))
-//		cout << "Podaci o ucenicima uspjesno pohranjeni u fajl" << endl;
-//	if (gimnazijaMostar.SpasiUFajl("Gimnazija.txt", true))
-//		cout << "Podaci o ucenicima uspjesno pohranjeni u fajl" << endl;
+		if (gimnazijaMostar.SpasiUFajl("Gimnazija.txt"))
+		cout << "Podaci o ucenicima uspjesno pohranjeni u fajl" << endl;
+		if (gimnazijaMostar.SpasiUFajl("Gimnazija.txt", true))
+		cout << "Podaci o ucenicima uspjesno pohranjeni u fajl" << endl;
 
 	cin.get();
 	system("pause>0");
