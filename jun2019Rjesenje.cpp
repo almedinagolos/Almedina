@@ -380,6 +380,28 @@ public:
 			return true;
 		}
 	}
+	/*
+		bool SpasiUFajl(string fajl, bool brisati = false)
+	{
+		ofstream upis;
+		if (!brisati)
+			upis.open(fajl, ios::app);
+		else
+			upis.open(fajl);
+		if (upis.fail())
+			return false;
+		upis << *this;
+		ifstream ispis(fajl);
+		if (ispis.fail())
+			return false;
+		char znak;
+		while (ispis.get(znak))
+		{
+			cout << znak;
+		}
+		return true;
+	}
+	*/
 
 };
 
