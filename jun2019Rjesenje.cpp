@@ -6,7 +6,6 @@
 #include <fstream>
 #include <string>
 #include <regex>
-
 using namespace std;
 
 /****************************************************************************
@@ -45,6 +44,47 @@ public:
 		_sortiranje = sortiranje;
 		_dozvoliDupliranje = dozvoliDupliranje;
 	}
+	Kolekcija(const Kolekcija& k) {
+		_trenutnoElemenata = k._trenutnoElemenata;
+		_dozvoliDupliranje = k._dozvoliDupliranje;
+		_sortiranje = k._sortiranje;
+
+		for (size_t i = 0; i < k._trenutnoElemenata; i++)
+		{
+			if (k._elementi1[i] != nullptr && k._elementi2[i] != nullptr) {
+				_elementi1[i] = new T1(*k._elementi1[i]);
+				_elementi2[i] = new T2(*k._elementi2[i]);
+			}
+			else {
+				_elementi1[i] = nullptr;
+				_elementi2[i] = nullptr;
+			}
+		}
+	}
+	Kolekcija& operator=(const Kolekcija& k) {
+		if (this != &k) {
+			for (size_t i = 0; i < _trenutnoElemenata; i++) {
+				delete _elementi1[i]; _elementi1[i] = nullptr;
+				delete _elementi2[i]; _elementi2[i] = nullptr;
+			}
+			_trenutnoElemenata = k._trenutnoElemenata;
+			_dozvoliDupliranje = k._dozvoliDupliranje;
+			_sortiranje = k._sortiranje;
+
+			for (size_t i = 0; i < k._trenutnoElemenata; i++)
+			{
+				if (k._elementi1[i] != nullptr && k._elementi2[i] != nullptr) {
+					_elementi1[i] = new T1(*k._elementi1[i]);
+					_elementi2[i] = new T2(*k._elementi2[i]);
+				}
+				else {
+					_elementi1[i] = nullptr;
+					_elementi2[i] = nullptr;
+				}
+			}
+		}
+		return *this;
+	}
 	~Kolekcija() {
 		for (size_t i = 0; i < _trenutnoElemenata; i++) {
 			delete _elementi1[i]; _elementi1[i] = nullptr;
@@ -72,73 +112,56 @@ public:
 			COUT << obj.GetElement1(i) << " " << obj.GetElement2(i) << endl;
 		return COUT;
 	}
-	Kolekcija(const Kolekcija& obj) {
-		_trenutnoElemenata = obj._trenutnoElemenata;
-		_sortiranje = obj._sortiranje;
-		_dozvoliDupliranje = obj._dozvoliDupliranje;
-		for (size_t i = 0; i < _trenutnoElemenata; i++)
-		{
-			if (obj._elementi1[i] != nullptr && obj._elementi2[i] != nullptr) {
-				_elementi1[i] = new T1(*obj._elementi1[i]);
-				_elementi2[i] = new T2(*obj._elementi2[i]);
-			}
-			else {
-				_elementi1[i] = nullptr;
-				_elementi2[i] = nullptr;
-			}
+	void AddElement(T1 el1, T2 el2) {
+		if (max == _trenutnoElemenata) {
+			throw exception("Prekoracen max broj elemenata");
 		}
-	}
-	void AddElement(const T1& ele1, const T2& ele2) {
-		if (_trenutnoElemenata == max) {
-			throw exception(nedozvoljena_operacija);
-			return;
-		}
-
-		if (_dozvoliDupliranje == false) {
+		if (!_dozvoliDupliranje) {
 			for (size_t i = 0; i < _trenutnoElemenata; i++)
 			{
-				if (*_elementi1[i] == ele1 && *_elementi2[i] == ele2) {
-					throw exception(nedozvoljena_operacija);
-					return;
-				}
+				if (*_elementi1[i] == el1 || *_elementi2[i] == el2)
+					throw exception("Nije dozvoljeno dupliranje elemenata.");
 			}
 		}
-		_elementi1[_trenutnoElemenata] = new T1(ele1);
-		_elementi2[_trenutnoElemenata] = new T2(ele2);
-		_trenutnoElemenata++;
-
+		_elementi1[_trenutnoElemenata] = new T1(el1);
+		_elementi2[_trenutnoElemenata++] = new T2(el2);
 		if (_sortiranje == 0) {
-
-			for (size_t i = 0; i < _trenutnoElemenata - 1; i++)
-			{
-				if (*_elementi1[i] > * _elementi1[i + 1]) {
-					T1 temp1 = *_elementi1[i];
-					T2 temp2 = *_elementi2[i];
-					*_elementi1[i] = *_elementi1[i + 1];
-					*_elementi2[i] = *_elementi2[i + 1];
-					*_elementi1[i + 1] = temp1;
-					*_elementi2[i + 1] = temp2;
-
+			bool promjena = true;
+			while (promjena) {
+				promjena = false;
+				for (size_t i = 0; i < _trenutnoElemenata - 1; i++)
+				{
+					if (*_elementi1[i] > * _elementi1[i + 1]) {
+						T1 temp1 = *_elementi1[i];
+						T2 temp2 = *_elementi2[i];
+						*_elementi1[i] = *_elementi1[i + 1];
+						*_elementi2[i] = *_elementi2[i + 1];
+						*_elementi1[i + 1] = temp1;
+						*_elementi2[i + 1] = temp2;
+						promjena = true;
+					}
 				}
 			}
 		}
 		else {
-			for (size_t i = 0; i < _trenutnoElemenata - 1; i++)
-			{
-				if (*_elementi1[i] < *_elementi1[i + 1]) {
-					T1 temp1 = *_elementi1[i];
-					T2 temp2 = *_elementi2[i];
-					*_elementi1[i] = *_elementi1[i + 1];
-					*_elementi2[i] = *_elementi2[i + 1];
-					*_elementi1[i + 1] = temp1;
-					*_elementi2[i + 1] = temp2;
-
+			bool promjena = true;
+			while (promjena) {
+				promjena = false;
+				for (size_t i = 0; i < _trenutnoElemenata - 1; i++)
+				{
+					if (*_elementi1[i] < * _elementi1[i + 1]) {
+						T1 temp1 = *_elementi1[i];
+						T2 temp2 = *_elementi2[i];
+						*_elementi1[i] = *_elementi1[i + 1];
+						*_elementi2[i] = *_elementi2[i + 1];
+						*_elementi1[i + 1] = temp1;
+						*_elementi2[i + 1] = temp2;
+						promjena = true;
+					}
 				}
 			}
 		}
 	}
-
-
 };
 
 class Aktivnost {
@@ -151,10 +174,10 @@ public:
 		_opis = opis;
 		_razred = make_shared<Razred>(razred);
 	}
-	Aktivnost(const Aktivnost& obj) {
-		_opis = obj._opis;
-		_ocjena = obj._ocjena;
-		_razred = make_shared<Razred>(*obj._razred);
+	Aktivnost(const Aktivnost& a) {
+		_razred = a._razred;
+		_opis = a._opis;
+		_ocjena = a._ocjena;
 	}
 	int  GetOcjenu() const { return _ocjena; }
 	string GetOpis() const { return _opis; }
@@ -164,72 +187,83 @@ public:
 		COUT << *obj._razred << " " << obj._ocjena << " " << obj._opis << endl;
 		return COUT;
 	}
-	bool operator==(const Aktivnost& a)
-	{
-		if (_opis == a._opis)
-			return true;
-		else return false;
+	bool operator==(const Aktivnost& a) {
+		return _opis == a._opis;
 	}
+	
 };
-
+/*
+	koristeci regex, osigurati sljedeci format za broj telefona: +387(6X)XXX-XXX ili +387 6X XXX-XXX
+	onemoguciti pojavljivanje samo jedne zagrade, a ukoliko format nije adekvatna koristiti vrijednost not_set
+	*/
+bool ValidirajTelefon(string tel) {
+	return regex_match(tel, regex("(\\+387)((\\(6\\d{1}\\))|(\\s6\\d{1}\\s))(\\d{3})([-])(\\d{3})"));
+}
 class Polaznik {
 protected:
 	char* _imePrezime;
 	string _brojTelefona;
-	bool ispravanBrojTelefona(string brojTelefona) {
-		//+387(6X)XXX-XXX ili +387 6X XXX-XXX
-		string provjera = "^(\\+387)((\\(6\\d\\))|(\\s6\\d\\s))(\\d{3}-\\d{3})$";
-		return regex_match(brojTelefona, regex(provjera));
-	}
 public:
 	Polaznik(string imePrezime, string brojTelefona) : _imePrezime(AlocirajNizKaraktera(imePrezime.c_str())) {
-		if (ispravanBrojTelefona(brojTelefona)) {
-			_brojTelefona = brojTelefona;
-		}
-		else
-		_brojTelefona = "NOT_SET";
+		if(ValidirajTelefon(brojTelefona)) _brojTelefona = brojTelefona;
+		else _brojTelefona = not_set;
 	}
-	Polaznik(const Polaznik& obj) {
-		_imePrezime = AlocirajNizKaraktera(obj._imePrezime);
-		_brojTelefona = obj._brojTelefona;
+	Polaznik(const Polaznik& p) {
+		_imePrezime = AlocirajNizKaraktera(p._imePrezime);
+		_brojTelefona = p._brojTelefona;
+	}
+	Polaznik& operator=(const Polaznik& p) {
+		if (this != &p) {
+			delete[] _imePrezime;
+			_imePrezime = AlocirajNizKaraktera(p._imePrezime);
+			_brojTelefona = p._brojTelefona;
+		}
+		return *this;
 	}
 	~Polaznik() { delete[] _imePrezime; }
 	char* GetImePrezime() { return _imePrezime; }
 	string GetTelefon() { return _imePrezime; }
 	virtual void PredstaviSe() = 0;
 };
-
-class Ucenik : public Polaznik {
+mutex m;
+class Ucenik:public Polaznik {
 	Kolekcija<Predmet, Aktivnost, 16>* _aktivnosti;
 public:
-	Ucenik(string imePrezime, string brojTelefona) :Polaznik(imePrezime, brojTelefona) {
-		_aktivnosti = new Kolekcija<Predmet, Aktivnost, 16>();
+	Ucenik(string imePrezime, string telefon):Polaznik(imePrezime, telefon), _aktivnosti(new Kolekcija<Predmet, Aktivnost, 16>()){}
+	Ucenik(const Ucenik &u):Polaznik(u), _aktivnosti(new Kolekcija<Predmet, Aktivnost, 16>(*u._aktivnosti)){}
+	Ucenik &operator=(const Ucenik& u) {
+		if (this != &u) {
+			Polaznik::operator=(u);
+			delete _aktivnosti; _aktivnosti = nullptr;
+			_aktivnosti = new Kolekcija<Predmet, Aktivnost, 16>(*u._aktivnosti);
+		}
+		return *this;
 	}
-	Ucenik(const Ucenik& original) :Polaznik(original)
-	{
-		_aktivnosti = new Kolekcija<Predmet, Aktivnost, 16>(*original._aktivnosti);
-
+	float getProsjek()const {
+		float prosjek = 0;
+		if (_aktivnosti->GetTrenutno() == 0) return 0;
+		for (size_t i = 0; i < _aktivnosti->GetTrenutno(); i++)
+		{
+			prosjek += _aktivnosti->GetElement2(i).GetOcjenu();
+		}
+		prosjek /= _aktivnosti->GetTrenutno();
+		return prosjek;
 	}
 	~Ucenik() { delete _aktivnosti; _aktivnosti = nullptr; }
 	Kolekcija<Predmet, Aktivnost, 16>& GetAktivnosti() { return *_aktivnosti; };
-	Kolekcija<Predmet, Aktivnost, 16>* GetAktivnosti2() { return _aktivnosti; };
-	friend ostream& operator<<(ostream& COUT, Ucenik& n)
+	friend ostream& operator<<(ostream& o, Ucenik& n)
 	{
-		COUT << "PODACI O UCENIKU I NJEGOVIM AKTIVNOSTIMA....IMPLEMENTIRATI" << endl;
-		COUT << "Ime i prezime" << n._imePrezime << endl;
-		COUT << "Broj telefona" << n._brojTelefona << endl;
+		o << "PODACI O UCENIKU I NJEGOVIM AKTIVNOSTIMA....IMPLEMENTIRATI" << endl;
+		o << "Ime i prezime -> " << n._imePrezime << endl;
+		o << "Broj telefona -> " << n._brojTelefona << endl;
 		if (n._aktivnosti != nullptr) {
-			COUT << *n._aktivnosti;
+			o << "Aktivnosti -> ";
+			o << *n._aktivnosti << endl;
 		}
-		else {
-			COUT << "Nema aktivnosti" << endl;
-		}
-		return COUT;
+		return o;
 	}
-	void PredstaviSe() {
-		cout << *this << endl;
-	}
-
+	void PredstaviSe() { cout << *this; }
+	
 };
 class Skola {
 	char* _naziv;
@@ -244,19 +278,6 @@ public:
 	char* GetNaziv()const { return _naziv; }
 	vector<Ucenik>& GetUcenici() { return _ucenici; };
 
-	void operator()(string imePrezime, string brojTelefona) {
-		Ucenik temp(imePrezime, brojTelefona);
-		vector<Ucenik>::iterator it = _ucenici.begin();
-		while (it != _ucenici.end()) {
-			if (it->GetImePrezime() == imePrezime || it->GetTelefon() == brojTelefona) {
-				throw exception("Ucenik sa tim imenom/brojem telefona vec postoji");
-				return;
-			}
-			it++;
-		}
-		_ucenici.push_back(temp);
-	}
-
 	friend ostream& operator<<(ostream& COUT, Skola& obj) {
 		COUT << "Skola: " << obj._naziv << endl;
 		COUT << "Ucenici: " << endl;
@@ -264,95 +285,66 @@ public:
 			COUT << obj._ucenici[i] << endl;
 		return COUT;
 	}
-	/*na nivou svakog razreda se mogu evidentirati maksimalno 4 aktivnosti, a takodjer, na nivou razreda se ne smiju ponavljati
-	aktivnosti iz istog predmeta*/
-	/*u slucaju da je ucenik uspjesno (ocjenom vecom od 1) realizovao aktivnosti na nivou odredjenog razreda, te posjeduje validan
-	broj telefona,
-	u okviru zasebnog thread-a se salje SMS sa sadrzajem "Uspjesno ste okoncali aktivnosti u okviru X razreda sa
-	prosjecnom ocjenom X.X"*/
-	
-	bool DodajAktivnost(string imePrezime, Predmet predmet, Aktivnost nekaAktivnost) {
+	void SaljemSms(Aktivnost a, Ucenik u) {
+		m.lock();
+		cout << "Uspjesno ste okoncali aktivnosti u okviru " << a.GetRazred() << " razreda sa prosjecnom ocjenom  " << u.getProsjek() << "." << endl;
+		m.unlock();
+	}
+	void operator()(string imePrezime, string telefon) {
+		Ucenik uc(imePrezime, telefon);
+		for (vector<Ucenik>::iterator i = _ucenici.begin(); i != _ucenici.end(); i++)
+		{
+			if (i->GetImePrezime() == imePrezime || i->GetTelefon() == telefon) {
+				throw exception("Ucenik vec postoji.");
+			}
+		}
+		_ucenici.push_back(uc);
+	}
+	bool DodajAktivnost(string imePrezime, Predmet p, Aktivnost a) {
 		int brojac = 0;
-		for (int i = 0; i < _ucenici.size(); i++) {
-			if (strcmp(imePrezime.c_str(), _ucenici[i].GetImePrezime()) == 0) {
-				for (int j = 0; j < _ucenici[i].GetAktivnosti().GetTrenutno(); j++) {
-					if (_ucenici[i].GetAktivnosti().GetElement2(j).GetRazred() == nekaAktivnost.GetRazred()) {
+		for (vector<Ucenik>::iterator i = _ucenici.begin(); i != _ucenici.end(); i++)
+		{
+			if (strcmp(i->GetImePrezime(), imePrezime.c_str()) == 0) {
+				for (size_t j = 0; j < i->GetAktivnosti().GetTrenutno(); j++)
+				{
+					if (i->GetAktivnosti().GetElement2(j).GetRazred() == a.GetRazred()) {
 						brojac++;
-						if (_ucenici[i].GetAktivnosti().GetElement1(j) == predmet) {
-							return false;
-
-						}
+						if (i->GetAktivnosti().GetElement1(j) == p) return false;
 					}
 				}
 			}
 		}
-		if (brojac > 4) {
-			return false;
-		}
-		for (int i = 0; i < _ucenici.size(); i++) {
-			if (strcmp(imePrezime.c_str(), _ucenici[i].GetImePrezime()) == 0) {
-				_ucenici[i].GetAktivnosti().AddElement(predmet, nekaAktivnost);
+		if (brojac >= 4) return false;
+		for (vector<Ucenik>::iterator i = _ucenici.begin(); i != _ucenici.end(); i++)
+		{
+			if (strcmp(i->GetImePrezime(), imePrezime.c_str()) == 0) {
+				i->GetAktivnosti().AddElement(p, a);
+				if (a.GetOcjenu() > 1) {
+					thread t_sms(&Skola::SaljemSms, this, a, *i);
+					t_sms.join();
+				}
 				return true;
 			}
 		}
+		return false;
 	}
-
-	pair<Polaznik*, float>GetNajboljegUcenika() {
-		Polaznik* p = nullptr;
+	pair<Polaznik*, float> GetNajboljegUcenika() {
 		float prosjek = 0;
-		
+		Polaznik* p = nullptr;
 		for (vector<Ucenik>::iterator i = _ucenici.begin(); i != _ucenici.end(); i++)
 		{
-			float trenutnoProsjek = 0;
+			float prosjekT = 0;
 			for (size_t j = 0; j < i->GetAktivnosti().GetTrenutno(); j++)
 			{
-				trenutnoProsjek += i->GetAktivnosti().GetElement2(j).GetOcjenu();
+				prosjekT = i->GetAktivnosti().GetElement2(j).GetOcjenu();
 			}
-			trenutnoProsjek /= i->GetAktivnosti().GetTrenutno();
-			if (prosjek < trenutnoProsjek) {
-				prosjek = trenutnoProsjek;
+			prosjekT /= i->GetAktivnosti().GetTrenutno();
+			if (prosjek < prosjekT) {
+				prosjek = prosjekT;
 				p = i._Ptr;
 			}
 		}
 		return pair<Polaznik*, float>(p, prosjek);
-	}
-	bool SpasiUFajl(string fajl, bool dodaj = false)
-	{
-		if (dodaj)
-		{
-			ofstream upis(fajl, ios::app);
-			upis << "Skola: " << _naziv << endl << "Ucenici: " << endl;
-			for (vector<Ucenik>::iterator i = _ucenici.begin(); i != _ucenici.end(); i++)
-			{
-				upis << *i << endl;
-			}
-			upis.close();
-			ifstream ispis(fajl);
-			char znak;
-			while (ispis.get(znak))
-				cout << znak;
-			cout << endl;
-			ispis.close();
-			return true;
-		}
-		else
-		{
-			ofstream upis("Gimnazija.txt", ios::out);
-			upis << "Skola: " << _naziv << endl << "Ucenici: " << endl;
-			for (vector<Ucenik>::iterator i = _ucenici.begin(); i != _ucenici.end(); i++)
-			{
-				upis << *i << endl;
-			}
-			upis.close();
-			ifstream ispis("Gimnazija.txt");
-			char znak;
-			while (ispis.get(znak))
-				cout << znak;
-			cout << endl;
-			ispis.close();
-			return true;
-		}
-		return false;
 	}
 };
 
@@ -362,7 +354,6 @@ int main() {
 		kolekcija1.AddElement(1, 2);
 		//dupliranje elemenata nije dozvoljeno
 		kolekcija1.AddElement(1, 2);
-
 	}
 	catch (exception & ex) {
 		cout << ex.what();
@@ -371,7 +362,7 @@ int main() {
 	/*nakon svakog dodavanja, elemente sortirati prema T1 i vrijednosti atributa _sortiranje*/
 	for (size_t i = 1; i < kolekcija1.GetMax() - 1; i++)
 		kolekcija1.AddElement(rand(), rand());
-
+	cout << endl;
 	cout << kolekcija1 << endl;
 
 	try {
@@ -391,10 +382,6 @@ int main() {
 	gimnazijaMostar("Jasmin Azemovic", "+387(61)111-222");
 	gimnazijaMostar("Adel Handzic", "+387(61)333-444");
 
-	/*
-	koristeci regex, osigurati sljedeci format za broj telefona: +387(6X)XXX-XXX ili +387 6X XXX-XXX
-	onemoguciti pojavljivanje samo jedne zagrade, a ukoliko format nije adekvatna koristiti vrijednost not_set
-	*/
 	gimnazijaMostar("Telefon NotValidFormat", "387 61)333-444");
 
 	try
@@ -409,12 +396,15 @@ int main() {
 
 	if (gimnazijaMostar.DodajAktivnost("Jasmin Azemovic", MATEMATIKA, Aktivnost(I, 4, "Priprema za takmicenje iz Matematije koje se odrzava u Konjicu 07.02.2019")))
 		cout << "Aktivnost uspjesno dodana" << endl;
+	/*na nivou svakog razreda se mogu evidentirati maksimalno 4 aktivnosti, a takodjer, na nivou razreda se ne smiju ponavljati aktivnosti iz istog predmeta*/
 	if (!gimnazijaMostar.DodajAktivnost("Jasmin Azemovic", MATEMATIKA, Aktivnost(I, 4, "Aktivnosti iz matematike")))
 		cout << "Aktivnost nije uspjesno dodana" << endl;
 	if (gimnazijaMostar.DodajAktivnost("Jasmin Azemovic", HEMIJA, Aktivnost(I, 5, "Priprema otopina za vjezbe iz predmeta Hemija")))
 		cout << "Aktivnost uspjesno dodana" << endl;
 	if (gimnazijaMostar.DodajAktivnost("Jasmin Azemovic", FIZIKA, Aktivnost(I, 4, "Analiza stepena apsorpcije materijala ")))
 		cout << "Aktivnost uspjesno dodana" << endl;
+	/*u slucaju da je ucenik uspjesno (ocjenom vecom od 1) realizovao aktivnosti na nivou odredjenog razreda, te posjeduje validan broj telefona,
+	u okviru zasebnog thread-a se salje SMS sa sadrzajem "Uspjesno ste okoncali aktivnosti u okviru X razreda sa prosjecnom ocjenom X.X"*/
 	if (gimnazijaMostar.DodajAktivnost("Jasmin Azemovic", GEOGRAFIJA, Aktivnost(I, 4, "Izrada 5 reljefa Mostara")))
 		cout << "Aktivnost uspjesno dodana" << endl;
 	if (gimnazijaMostar.DodajAktivnost("Adel Handzic", MATEMATIKA, Aktivnost(I, 5, "Izrada skripte na temu integralni racun")))
@@ -425,18 +415,15 @@ int main() {
 
 
 	pair<Polaznik*, float> par = gimnazijaMostar.GetNajboljegUcenika();
-	if (par.first != nullptr)
-		cout << "Najbolji ucenik je " << par.first->GetImePrezime() << " sa prosjekom " << par.second << endl;
-	else
-		cout << "Nema aktivnosti";
+	cout << "Najbolji ucenik je " << par.first->GetImePrezime() << " sa prosjekom " << par.second << endl;
 
 	/*U fajl (npr. Gimnazija.txt) upisati podatke (podatke upisati kao obicni tekst) o skoli i svim ucenicima.
 	Nakon upisa, potrebno je ispisati sadrzaj fajla. Parametar tipa bool oznacava da li ce ranije dodani sadrzaj fajla prethodno biti pobrisan*/
 
-	if (gimnazijaMostar.SpasiUFajl("Gimnazija.txt"))
-		cout << "Podaci o ucenicima uspjesno pohranjeni u fajl" << endl;
-	if (gimnazijaMostar.SpasiUFajl("Gimnazija.txt", true))
-		cout << "Podaci o ucenicima uspjesno pohranjeni u fajl" << endl;
+	//	if (gimnazijaMostar.SpasiUFajl("Gimnazija.txt"))
+//		cout << "Podaci o ucenicima uspjesno pohranjeni u fajl" << endl;
+//	if (gimnazijaMostar.SpasiUFajl("Gimnazija.txt", true))
+//		cout << "Podaci o ucenicima uspjesno pohranjeni u fajl" << endl;
 
 	cin.get();
 	system("pause>0");
