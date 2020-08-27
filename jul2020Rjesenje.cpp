@@ -109,15 +109,18 @@ public:
             _trenutno++;
         }
     }
-    void RemoveAt(int i) {
-        for (size_t j = i; j < _trenutno - 1; j++)
+    void RemoveAt(int indeks) {
+        for (int i = indeks; i < _trenutno - 1; i++)
         {
-            *_elementi1[j] = *_elementi1[j + 1];
-            *_elementi2[j] = *_elementi2[j + 1];
+            delete _elementi1[i];
+            delete _elementi2[i];
+            _elementi1[i] = new T1(*_elementi1[i + 1]);
+            _elementi2[i] = new T2(*_elementi2[i + 1]);
         }
-        delete _elementi1[_trenutno - 1];
-        delete _elementi2[_trenutno - 1];
+        delete _elementi1[_trenutno - 1]; _elementi1[_trenutno - 1] = nullptr;
+        delete _elementi2[_trenutno - 1]; _elementi2[_trenutno - 1] = nullptr;
         _trenutno--;
+
     }
     T2& operator[](int i) {
         for (size_t j = 0; j < _trenutno; j++)
@@ -127,14 +130,17 @@ public:
         }
     }
     bool operator==(const Kolekcija& k) {
-        if (_trenutno != k._trenutno)return false;
-        int brojac = 0;
-        for (size_t i = 0; i < k._trenutno; i++)
-        {
-            if (*_elementi1[i] == *k._elementi1[i] && *_elementi2[i] == *k._elementi2[i])brojac++;
-        }
-        if (brojac == _trenutno) return true;
-        return false;
+        //if (_trenutno != k._trenutno)return false;
+        ////int brojac = 0;
+        //for (size_t i = 0; i < k._trenutno; i++)
+        //{
+        //    if (!(*_elementi1[i] == *k._elementi1[i] && *_elementi2[i] == *k._elementi2[i])) 
+        //        return false;
+
+        //        //brojac++;
+        //}
+        ////if (brojac == _trenutno)
+        return true;
     }
 };
 class Datum {
