@@ -130,16 +130,12 @@ public:
         }
     }
     bool operator==(const Kolekcija& k) {
-        //if (_trenutno != k._trenutno)return false;
-        ////int brojac = 0;
-        //for (size_t i = 0; i < k._trenutno; i++)
-        //{
-        //    if (!(*_elementi1[i] == *k._elementi1[i] && *_elementi2[i] == *k._elementi2[i])) 
-        //        return false;
-
-        //        //brojac++;
-        //}
-        ////if (brojac == _trenutno)
+        if (_trenutno != k._trenutno)return false;
+        for (size_t i = 0; i < k._trenutno; i++)
+        {
+            if (!(*_elementi1[i] == *k._elementi1[i] && *_elementi2[i] == *k._elementi2[i])) 
+                return false;
+        }
         return true;
     }
 };
