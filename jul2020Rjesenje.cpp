@@ -364,11 +364,9 @@ public:
          float prosjek = 0;
          int brojac = 0;
          for (size_t i = 0; i < _polozeniPojasevi.size(); i++)
-         {
-              
+         {             
                  prosjek += _polozeniPojasevi[i].getProsjek();
                  brojac++;
-             
          }
          prosjek /= brojac;
          return prosjek;
