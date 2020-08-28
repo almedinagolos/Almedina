@@ -113,6 +113,20 @@ public:
             _trenutno++;
         }
     }
+     /* // prvo rjesenje else if, mislim da je gornje bolje
+     else if(lokacija > -1 && lokacija < max) {
+            _elementi1[_trenutno] = new T1;
+            _elementi2[_trenutno] = new T2;
+            for (size_t i = _trenutno; i >= lokacija; i--)
+            {      
+                *_elementi1[i] = *_elementi1[i - 1];
+                *_elementi2[i] = *_elementi2[i - 1];
+            }
+            *_elementi1[lokacija] = el1;
+            *_elementi2[lokacija] = el2;
+            _trenutno++;
+        }
+    */
     void RemoveAt(int lok) {
         for (size_t i = lok; i < _trenutno - 1; i++)
         {
@@ -125,6 +139,14 @@ public:
         delete _elementi2[_trenutno - 1]; _elementi2[_trenutno - 1] = nullptr;
         _trenutno--;
     }
+     /* void RemoveAt(int i) {
+        for (size_t j = i; j < _trenutno - 1; j++)
+        {
+            *_elementi1[i] = *_elementi1[i + 1];
+            *_elementi2[i] = *_elementi2[i + 1];
+        }
+        _trenutno--;
+    }*/
     T2& operator[](T1 el1) {
         for (size_t i = 0; i < _trenutno; i++)
         {
