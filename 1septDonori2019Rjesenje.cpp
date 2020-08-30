@@ -326,17 +326,14 @@ public:
 			delete _donacije.GetElement1(i);
 	}
 	Datum* GetDatumPosljednjegDoniranja(string ime, string telefon) {
-		Datum *datumPosljednjeg = nullptr;
+		Datum* d = nullptr;
 		for (size_t i = 0; i < _donacije.GetTrenutno(); i++)
 		{
-			Donor* d = dynamic_cast<Donor*>(_donacije.GetElement1(i));
-		for (size_t j = 0; j < d->GetKrvnaGrupa().GetDonori().size();/*_donacije.GetElement1(i)->GetKrvnaGrupa().GetDonori().size();*/ j++)
-			{
-				if (d->GetImePrezime() == ime.c_str() || d->GetBrojTelefona() == telefon.c_str()) {
-					datumPosljednjeg = &d->GetDatumPosljednjegDoniranja();
-					return datumPosljednjeg;
-				}
-			}			
+			Donor* donor = dynamic_cast<Donor*>(_donacije.GetElement1(i));
+			if (donor->GetImePrezime() == ime && donor->GetTelefon() == telefon) {
+				d = &donor->GetDatumPosljednjegDoniranja();
+				return d;
+			}
 		}
 		return nullptr;
 	}
