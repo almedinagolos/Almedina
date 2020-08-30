@@ -112,25 +112,15 @@ public:
         }
     }
     void RemoveAt(int lok) {
-        for (size_t i = lok; i < _trenutno - 1; i++)
+       for (size_t i = lok; i < _trenutno - 1; i++)
         {
-            delete _elementi1[i];
-            delete _elementi2[i];
-            _elementi1[i] = new T1(*_elementi1[i + 1]);
-            _elementi2[i] = new T2(*_elementi2[i + 1]);
+            *_elementi1[i] = *_elementi1[i + 1];
+            *_elementi2[i] = *_elementi2[i + 1];
         }
         delete _elementi1[_trenutno - 1]; _elementi1[_trenutno - 1] = nullptr;
         delete _elementi2[_trenutno - 1]; _elementi2[_trenutno - 1] = nullptr;
         _trenutno--;
     }
-     /* void RemoveAt(int i) {
-        for (size_t j = i; j < _trenutno - 1; j++)
-        {
-            *_elementi1[i] = *_elementi1[i + 1];
-            *_elementi2[i] = *_elementi2[i + 1];
-        }
-        _trenutno--;
-    }*/
     T2& operator[](T1 el1) {
         for (size_t i = 0; i < _trenutno; i++)
         {
