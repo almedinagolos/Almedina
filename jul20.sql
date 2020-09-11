@@ -228,7 +228,7 @@ Proceduru pokrenuti za sljedeće vrijednosti:
 	- stopa poreza = 12, 15 i 21 
 */
 --10 bodova
-ALTER PROCEDURE proc_stopa_poreza
+CREATE PROCEDURE proc_stopa_poreza
 (
 @ProdajaID INT = NULL,
 @Stopa_Poreza NVARCHAR(10) = NULL,
@@ -264,7 +264,7 @@ DROP CONSTRAINT CK_OnlineNarudzba
 ALTER TABLE Prodaja
 ALTER COLUMN Online_Narudzba NVARCHAR(3)
 
-ALTER PROCEDURE proc_prodaja
+CREATE PROCEDURE proc_prodaja
 AS
 BEGIN
 UPDATE Prodaja
